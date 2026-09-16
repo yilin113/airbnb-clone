@@ -40,7 +40,10 @@ describe("POST /api/reservations", () => {
 
     const response = await POST(postRequest(reservationBody));
 
-    expect(response.type).toBe("error");
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "UNAUTHORIZED" },
+    });
     expect(prismaMock.listing.update).not.toHaveBeenCalled();
   });
 
@@ -54,7 +57,35 @@ describe("POST /api/reservations", () => {
 
     const response = await POST(postRequest(body));
 
-    expect(response.type).toBe("error");
+    expect(response.status).toBe(422);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "VALIDATION_ERROR" },
+    });
+    expect(prismaMock.listing.update).not.toHaveBeenCalled();
+  });
+
+  it("rejects a checkout date that is not after check-in", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+
+    const response = await POST(
+      postRequest({
+        ...reservationBody,
+        endDate: reservationBody.startDate,
+      }),
+    );
+
+    expect(response.status).toBe(422);
+    await expect(response.json()).resolves.toMatchObject({
+      error: {
+        code: "VALIDATION_ERROR",
+        issues: [
+          {
+            path: "endDate",
+            message: "End date must be after start date.",
+          },
+        ],
+      },
+    });
     expect(prismaMock.listing.update).not.toHaveBeenCalled();
   });
 

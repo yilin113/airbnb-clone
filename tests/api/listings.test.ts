@@ -45,7 +45,24 @@ describe("POST /api/listings", () => {
 
     const response = await POST(postRequest(listingBody));
 
-    expect(response.type).toBe("error");
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "UNAUTHORIZED" },
+    });
+    expect(prismaMock.listing.create).not.toHaveBeenCalled();
+  });
+
+  it("returns validation issues for malformed listing data", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+
+    const response = await POST(
+      postRequest({ ...listingBody, imageSrc: "not-a-url", price: 0 }),
+    );
+
+    expect(response.status).toBe(422);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "VALIDATION_ERROR" },
+    });
     expect(prismaMock.listing.create).not.toHaveBeenCalled();
   });
 
