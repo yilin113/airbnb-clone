@@ -50,14 +50,14 @@ beforeEach(() => {
 });
 
 describe("ListingClient", () => {
-  it("renders the listing and its nightly price", () => {
+  it("renders the listing and its monthly price", () => {
     render(<ListingClient listing={listing} currentUser={makeUser()} />);
 
     expect(screen.getByText("Sunny loft")).toBeInTheDocument();
     expect(
       screen.getByText("This property is close to the beach!"),
     ).toBeInTheDocument();
-    expect(screen.getAllByText("$ 120")).toHaveLength(2);
+    expect(screen.getAllByText("¥ 120")).toHaveLength(2);
   });
 
   it("blocks out the dates of existing reservations", () => {
@@ -76,7 +76,7 @@ describe("ListingClient", () => {
 
     expect(screen.getByTestId("date-range")).toHaveAttribute(
       "data-disabled-count",
-      "3",
+      "2",
     );
   });
 
@@ -93,10 +93,10 @@ describe("ListingClient", () => {
       });
     });
 
-    expect(await screen.findByText("$ 480")).toBeInTheDocument();
+    expect(await screen.findByText("¥ 17")).toBeInTheDocument();
   });
 
-  it("keeps the nightly price for an open-ended range", () => {
+  it("keeps the monthly price and does not submit an open-ended range", async () => {
     render(<ListingClient listing={listing} currentUser={makeUser()} />);
 
     act(() => {
@@ -105,10 +105,13 @@ describe("ListingClient", () => {
       });
     });
 
-    expect(screen.getAllByText("$ 120")).toHaveLength(2);
+    expect(screen.getAllByText("¥ 120")).toHaveLength(2);
+
+    await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
+    expect(mockedAxios.post).not.toHaveBeenCalled();
   });
 
-  it("keeps the nightly price when only an end date is picked", () => {
+  it("keeps the monthly price and does not submit an end-only range", async () => {
     render(<ListingClient listing={listing} currentUser={makeUser()} />);
 
     act(() => {
@@ -117,7 +120,10 @@ describe("ListingClient", () => {
       });
     });
 
-    expect(screen.getAllByText("$ 120")).toHaveLength(2);
+    expect(screen.getAllByText("¥ 120")).toHaveLength(2);
+
+    await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
+    expect(mockedAxios.post).not.toHaveBeenCalled();
   });
 
   it("books the stay and sends the guest to their trips", async () => {
@@ -129,12 +135,10 @@ describe("ListingClient", () => {
     await waitFor(() => {
       expect(mockedAxios.post).toHaveBeenCalledWith(
         "/api/reservations",
-        expect.objectContaining({ listingId: "listing-1", totalPrice: 120 }),
+        expect.not.objectContaining({ totalPrice: expect.anything() }),
       );
     });
-    expect(toast.success).toHaveBeenCalledWith(
-      "Reservation created successfully",
-    );
+    expect(toast.success).toHaveBeenCalledWith("Booking request sent");
     expect(routerMock.push).toHaveBeenCalledWith("/trips");
   });
 
@@ -160,7 +164,7 @@ describe("ListingClient", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("falls back to the nightly price when the listing is free", () => {
+  it("falls back to the monthly price when the listing is free", () => {
     render(
       <ListingClient
         listing={{ ...listing, price: 0 }}
@@ -178,6 +182,6 @@ describe("ListingClient", () => {
       });
     });
 
-    expect(screen.getAllByText("$ 0")).toHaveLength(2);
+    expect(screen.getAllByText("¥ 0")).toHaveLength(2);
   });
 });

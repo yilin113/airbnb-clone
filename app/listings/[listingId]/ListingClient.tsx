@@ -8,11 +8,18 @@ import { categories } from "@/app/components/navbar/Categories";
 import useLoginModal from "@/app/hooks/useLoginModal";
 import { Listing, Reservation, User } from "@prisma/client";
 import axios from "axios";
-import { differenceInCalendarDays, eachDayOfInterval } from "date-fns";
+import {
+  differenceInCalendarDays,
+  eachDayOfInterval,
+  format,
+  subDays,
+} from "date-fns";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { Range } from "react-date-range";
 import toast from "react-hot-toast";
+import { DEFAULT_PRICING_CONFIG } from "@/app/config/pricing";
+import { calculateReservationQuote } from "@/app/domain/pricing";
 
 const initialDateRange = {
   startDate: new Date(),
@@ -26,12 +33,14 @@ interface IListingClientProps {
     user: User;
   };
   currentUser?: User | null;
+  pricingConfig?: typeof DEFAULT_PRICING_CONFIG;
 }
 
 const ListingClient: React.FC<IListingClientProps> = ({
   listing,
   currentUser,
   reservations = [],
+  pricingConfig = DEFAULT_PRICING_CONFIG,
 }) => {
   const loginModal = useLoginModal();
   const router = useRouter();
@@ -42,7 +51,7 @@ const ListingClient: React.FC<IListingClientProps> = ({
     reservations.forEach((reservation) => {
       const range = eachDayOfInterval({
         start: new Date(reservation.startDate),
-        end: new Date(reservation.endDate),
+        end: subDays(new Date(reservation.endDate), 1),
       });
 
       dates = [...dates, ...range];
@@ -62,36 +71,47 @@ const ListingClient: React.FC<IListingClientProps> = ({
       );
 
       if (dayCount && listing.price) {
-        return dayCount * listing.price;
+        return calculateReservationQuote({
+          nights: dayCount,
+          monthlyRent: listing.price,
+          monthlyUtilities: listing.utilitiesFee,
+          monthlyManagement: listing.managementFee,
+          cleaningFee: listing.cleaningFee,
+          deposit: listing.deposit,
+          ...pricingConfig,
+        }).totalPrice;
       }
     }
 
     return listing.price;
-  }, [dateRange, listing.price]);
+  }, [dateRange, listing, pricingConfig]);
 
   const onCreateReservation = useCallback(async () => {
     if (!currentUser) {
       return loginModal.onOpen();
     }
 
+    if (!dateRange.startDate || !dateRange.endDate) {
+      return;
+    }
+
     setIsLoading(true);
 
     axios
       .post("/api/reservations", {
-        totalPrice,
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate,
+        startDate: format(dateRange.startDate, "yyyy-MM-dd"),
+        endDate: format(dateRange.endDate, "yyyy-MM-dd"),
         listingId: listing.id,
       })
       .then(() => {
-        toast.success("Reservation created successfully");
+        toast.success("Booking request sent");
         setDateRange(initialDateRange);
         router.push("/trips");
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, [totalPrice, dateRange, listing.id, currentUser, loginModal, router]);
+  }, [dateRange, listing.id, currentUser, loginModal, router]);
 
   const category = useMemo(() => {
     return categories.find((item) => item.label === listing.category);

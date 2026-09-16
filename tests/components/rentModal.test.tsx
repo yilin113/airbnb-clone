@@ -117,7 +117,9 @@ describe("RentModal", () => {
     );
 
     await next();
-    expect(screen.getByText("Now let's set up your price")).toBeInTheDocument();
+    expect(
+      screen.getByText("Now let's set up your monthly rent"),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Publish" })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Back" }));

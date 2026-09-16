@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DELETE } from "@/app/api/reservations/[reservationId]/route";
 import { POST } from "@/app/api/reservations/route";
-import { makeListing, makeUser } from "../helpers/factories";
+import { makeListing, makeReservation, makeUser } from "../helpers/factories";
 import { prismaMock } from "../helpers/prisma";
 
 const getCurrentUser = vi.hoisted(() => vi.fn());
@@ -24,14 +24,25 @@ function postRequest(body: unknown) {
 const reservationBody = {
   listingId: "listing-1",
   startDate: "2024-05-01T00:00:00.000Z",
-  endDate: "2024-05-05T00:00:00.000Z",
-  totalPrice: 480,
+  endDate: "2024-05-31T00:00:00.000Z",
 };
+
+const pricedListing = makeListing({
+  price: 30_000,
+  utilitiesFee: 6_000,
+  managementFee: 3_000,
+  cleaningFee: 5_000,
+  deposit: 20_000,
+});
 
 beforeEach(() => {
   getCurrentUser.mockReset();
-  prismaMock.listing.update.mockReset();
+  prismaMock.$transaction.mockClear();
+  prismaMock.listing.findUnique.mockReset();
+  prismaMock.reservation.findFirst.mockReset();
+  prismaMock.reservation.create.mockReset();
   prismaMock.reservation.deleteMany.mockReset();
+  prismaMock.availabilityDay.createMany.mockReset();
 });
 
 describe("POST /api/reservations", () => {
@@ -44,14 +55,13 @@ describe("POST /api/reservations", () => {
     await expect(response.json()).resolves.toMatchObject({
       error: { code: "UNAUTHORIZED" },
     });
-    expect(prismaMock.listing.update).not.toHaveBeenCalled();
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
   });
 
   it.each([
     ["listingId", { ...reservationBody, listingId: "" }],
     ["startDate", { ...reservationBody, startDate: "" }],
     ["endDate", { ...reservationBody, endDate: "" }],
-    ["totalPrice", { ...reservationBody, totalPrice: 0 }],
   ])("errors when %s is missing", async (_field, body) => {
     getCurrentUser.mockResolvedValue(makeUser());
 
@@ -61,17 +71,14 @@ describe("POST /api/reservations", () => {
     await expect(response.json()).resolves.toMatchObject({
       error: { code: "VALIDATION_ERROR" },
     });
-    expect(prismaMock.listing.update).not.toHaveBeenCalled();
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
   });
 
   it("rejects a checkout date that is not after check-in", async () => {
     getCurrentUser.mockResolvedValue(makeUser());
 
     const response = await POST(
-      postRequest({
-        ...reservationBody,
-        endDate: reservationBody.startDate,
-      }),
+      postRequest({ ...reservationBody, endDate: reservationBody.startDate }),
     );
 
     expect(response.status).toBe(422);
@@ -86,31 +93,155 @@ describe("POST /api/reservations", () => {
         ],
       },
     });
-    expect(prismaMock.listing.update).not.toHaveBeenCalled();
   });
 
-  it("nests the reservation under the listing", async () => {
+  it("enforces the 30-night minimum", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+
+    const response = await POST(
+      postRequest({
+        ...reservationBody,
+        endDate: "2024-05-30T00:00:00.000Z",
+      }),
+    );
+
+    expect(response.status).toBe(422);
+    await expect(response.json()).resolves.toMatchObject({
+      error: {
+        issues: [
+          { path: "endDate", message: "Stays must be at least 30 nights." },
+        ],
+      },
+    });
+  });
+
+  it("calculates the quote on the server and locks every occupied night", async () => {
     const user = makeUser();
-    const listing = makeListing();
+    const created = makeReservation({
+      startDate: new Date(reservationBody.startDate),
+      endDate: new Date(reservationBody.endDate),
+      nights: 30,
+      rentSubtotal: 30_000,
+      utilitiesTotal: 6_000,
+      managementTotal: 3_000,
+      cleaningFee: 5_000,
+      deposit: 20_000,
+      guestServiceFee: 2_640,
+      hostCommission: 2_640,
+      totalPrice: 66_640,
+      hostPayout: 41_360,
+    });
     getCurrentUser.mockResolvedValue(user);
-    prismaMock.listing.update.mockResolvedValue(listing);
+    prismaMock.listing.findUnique.mockResolvedValue(pricedListing);
+    prismaMock.reservation.findFirst.mockResolvedValue(null);
+    prismaMock.reservation.create.mockResolvedValue(created);
+    prismaMock.availabilityDay.createMany.mockResolvedValue({ count: 30 });
+
+    const response = await POST(
+      postRequest({ ...reservationBody, totalPrice: 1 }),
+    );
+
+    expect(response.status).toBe(201);
+    expect(prismaMock.listing.findUnique).toHaveBeenCalledWith({
+      where: { id: "listing-1" },
+      select: {
+        price: true,
+        utilitiesFee: true,
+        managementFee: true,
+        cleaningFee: true,
+        deposit: true,
+      },
+    });
+    expect(prismaMock.reservation.findFirst).toHaveBeenCalledWith({
+      where: {
+        listingId: "listing-1",
+        status: { in: ["PENDING", "APPROVED"] },
+        startDate: { lt: new Date(reservationBody.endDate) },
+        endDate: { gt: new Date(reservationBody.startDate) },
+      },
+      select: { id: true },
+    });
+    expect(prismaMock.reservation.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        userId: user.id,
+        listingId: "listing-1",
+        nights: 30,
+        rentSubtotal: 30_000,
+        guestServiceFee: 2_640,
+        hostCommission: 2_640,
+        totalPrice: 66_640,
+        hostPayout: 41_360,
+        status: "PENDING",
+      }),
+    });
+    const lockInput = prismaMock.availabilityDay.createMany.mock.calls[0][0];
+    expect(lockInput.data).toHaveLength(30);
+    expect(lockInput.data[0]).toEqual({
+      listingId: "listing-1",
+      reservationId: created.id,
+      date: new Date(reservationBody.startDate),
+    });
+    expect(lockInput.data[29].date).toEqual(
+      new Date("2024-05-30T00:00:00.000Z"),
+    );
+    await expect(response.json()).resolves.toMatchObject({
+      id: created.id,
+      totalPrice: 66_640,
+      status: "PENDING",
+    });
+  });
+
+  it("returns not found for an unknown listing", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+    prismaMock.listing.findUnique.mockResolvedValue(null);
 
     const response = await POST(postRequest(reservationBody));
 
-    expect(prismaMock.listing.update).toHaveBeenCalledWith({
-      where: { id: "listing-1" },
-      data: {
-        reservations: {
-          create: {
-            userId: user.id,
-            startDate: reservationBody.startDate,
-            endDate: reservationBody.endDate,
-            totalPrice: reservationBody.totalPrice,
-          },
-        },
-      },
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "LISTING_NOT_FOUND" },
     });
-    await expect(response.json()).resolves.toMatchObject({ id: listing.id });
+  });
+
+  it("rejects a range that overlaps an existing request", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+    prismaMock.listing.findUnique.mockResolvedValue(pricedListing);
+    prismaMock.reservation.findFirst.mockResolvedValue({ id: "existing" });
+
+    const response = await POST(postRequest(reservationBody));
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "BOOKING_CONFLICT" },
+    });
+    expect(prismaMock.reservation.create).not.toHaveBeenCalled();
+  });
+
+  it("maps a unique day-lock race to a booking conflict", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+    prismaMock.listing.findUnique.mockResolvedValue(pricedListing);
+    prismaMock.reservation.findFirst.mockResolvedValue(null);
+    prismaMock.reservation.create.mockResolvedValue(makeReservation());
+    prismaMock.availabilityDay.createMany.mockRejectedValue({ code: "P2002" });
+
+    const response = await POST(postRequest(reservationBody));
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "BOOKING_CONFLICT" },
+    });
+  });
+
+  it("returns a safe error for an unexpected database failure", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+    prismaMock.listing.findUnique.mockRejectedValue(new Error("db down"));
+
+    const response = await POST(postRequest(reservationBody));
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "INTERNAL_ERROR" },
+    });
   });
 });
 

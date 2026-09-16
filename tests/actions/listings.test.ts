@@ -60,16 +60,9 @@ describe("getListings", () => {
         NOT: {
           reservations: {
             some: {
-              OR: [
-                {
-                  endDate: { gte: "2024-05-01" },
-                  startDate: { lte: "2024-05-01" },
-                },
-                {
-                  startDate: { lte: "2024-05-05" },
-                  endDate: { gte: "2024-05-05" },
-                },
-              ],
+              status: { in: ["PENDING", "APPROVED"] },
+              startDate: { lt: "2024-05-05" },
+              endDate: { gt: "2024-05-01" },
             },
           },
         },

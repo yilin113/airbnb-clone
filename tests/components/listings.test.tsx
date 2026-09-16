@@ -48,11 +48,11 @@ describe("ListingCategory", () => {
 });
 
 describe("ListingCard", () => {
-  it("shows the nightly price and opens the listing", async () => {
+  it("shows the monthly price and opens the listing", async () => {
     render(<ListingCard data={makeListing()} />);
 
-    expect(screen.getByText("$ 120")).toBeInTheDocument();
-    expect(screen.getByText("night")).toBeInTheDocument();
+    expect(screen.getByText("¥ 120")).toBeInTheDocument();
+    expect(screen.getByText("month")).toBeInTheDocument();
     expect(screen.getByText("Beach")).toBeInTheDocument();
     expect(screen.getByText("Americas, Peru")).toBeInTheDocument();
 
@@ -70,13 +70,13 @@ describe("ListingCard", () => {
     );
   });
 
-  it("shows the reservation total and dates instead of the nightly price", () => {
+  it("shows the reservation total and dates instead of the monthly price", () => {
     render(
       <ListingCard data={makeListing()} reservation={makeReservation()} />,
     );
 
-    expect(screen.getByText("$ 480")).toBeInTheDocument();
-    expect(screen.queryByText("night")).not.toBeInTheDocument();
+    expect(screen.getByText("¥ 480")).toBeInTheDocument();
+    expect(screen.queryByText("month")).not.toBeInTheDocument();
     expect(screen.getByText(/May 1, 2024 - May 5, 2024/)).toBeInTheDocument();
   });
 
@@ -207,8 +207,8 @@ describe("ListingReservation", () => {
       />,
     );
 
-    expect(screen.getByText("$ 120")).toBeInTheDocument();
-    expect(screen.getByText("$ 480")).toBeInTheDocument();
+    expect(screen.getByText("¥ 120")).toBeInTheDocument();
+    expect(screen.getByText("¥ 480")).toBeInTheDocument();
     expect(screen.getByTestId("date-range")).toHaveAttribute(
       "data-disabled-count",
       "0",

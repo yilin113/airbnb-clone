@@ -57,21 +57,59 @@ model Listing {
   bathroomCount Int
   guestCount    Int
   locationValue String
+  // Monthly amounts in JPY. `price` is kept for compatibility with the
+  // original clone, but now represents the monthly base rent.
   price         Int
+  utilitiesFee  Int      @default(0)
+  managementFee Int      @default(0)
+  cleaningFee   Int      @default(0)
+  deposit       Int      @default(0)
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reservations Reservation[]
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reservations     Reservation[]
+  availabilityDays AvailabilityDay[]
 }
 
 model Reservation {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String   @db.ObjectId
-  listingId  String   @db.ObjectId
-  startDate  DateTime
-  endDate    DateTime
-  totalPrice Int
-  createdAt  DateTime @default(now())
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String            @db.ObjectId
+  listingId       String            @db.ObjectId
+  startDate       DateTime
+  endDate         DateTime
+  nights          Int
+  rentSubtotal    Int
+  utilitiesTotal  Int
+  managementTotal Int
+  cleaningFee     Int
+  deposit         Int
+  guestServiceFee Int
+  hostCommission  Int
+  totalPrice      Int
+  hostPayout      Int
+  status          ReservationStatus @default(PENDING)
+  createdAt       DateTime          @default(now())
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing          Listing           @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  availabilityDays AvailabilityDay[]
+}
+
+model AvailabilityDay {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  listingId     String   @db.ObjectId
+  reservationId String   @db.ObjectId
+  date          DateTime
+
+  listing     Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, date])
+  @@index([reservationId])
+}
+
+enum ReservationStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  CANCELLED
 }

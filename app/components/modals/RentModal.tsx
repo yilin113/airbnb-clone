@@ -242,12 +242,12 @@ const RentModal = () => {
     bodyContent = (
       <div className="flex flex-col gap-8">
         <Heading
-          title="Now let's set up your price"
+          title="Now let's set up your monthly rent"
           subtitle="You can always edit this later"
         />
         <Input
           id="price"
-          label="Price"
+          label="Monthly rent (JPY)"
           formatPrice
           type="number"
           disabled={isLoading}

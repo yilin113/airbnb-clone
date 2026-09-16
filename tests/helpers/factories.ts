@@ -29,6 +29,10 @@ export function makeListing(overrides: Partial<Listing> = {}): Listing {
     guestCount: 4,
     locationValue: "PE",
     price: 120,
+    utilitiesFee: 0,
+    managementFee: 0,
+    cleaningFee: 0,
+    deposit: 0,
     ...overrides,
   };
 }
@@ -43,7 +47,17 @@ export function makeReservation(
     // Local-time constructors keep the formatted output timezone independent.
     startDate: new Date(2024, 4, 1),
     endDate: new Date(2024, 4, 5),
+    nights: 4,
+    rentSubtotal: 480,
+    utilitiesTotal: 0,
+    managementTotal: 0,
+    cleaningFee: 0,
+    deposit: 0,
+    guestServiceFee: 29,
+    hostCommission: 29,
     totalPrice: 480,
+    hostPayout: 451,
+    status: "PENDING",
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     ...overrides,
   };

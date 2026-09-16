@@ -9,6 +9,10 @@ import { vi } from "vitest";
  *   }));
  */
 export const prismaMock = {
+  $transaction: vi.fn(
+    async (callback: (transaction: typeof prismaMock) => unknown) =>
+      callback(prismaMock),
+  ),
   user: {
     findUnique: vi.fn(),
     create: vi.fn(),
@@ -23,6 +27,11 @@ export const prismaMock = {
   },
   reservation: {
     findMany: vi.fn(),
+    findFirst: vi.fn(),
+    create: vi.fn(),
     deleteMany: vi.fn(),
+  },
+  availabilityDay: {
+    createMany: vi.fn(),
   },
 };

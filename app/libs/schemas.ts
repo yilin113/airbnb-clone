@@ -23,11 +23,37 @@ export const listingSchema = z.object({
 export const reservationSchema = z
   .object({
     listingId: z.string().trim().min(1).max(100),
-    startDate: z.string().datetime(),
-    endDate: z.string().datetime(),
-    totalPrice: z.coerce.number().int().min(1).max(1_000_000_000),
+    startDate: z.union([z.iso.date(), z.iso.datetime()]),
+    endDate: z.union([z.iso.date(), z.iso.datetime()]),
   })
-  .refine((value) => new Date(value.endDate) > new Date(value.startDate), {
-    path: ["endDate"],
-    message: "End date must be after start date.",
+  .superRefine((value, context) => {
+    const startDate = new Date(value.startDate);
+    const endDate = new Date(value.endDate);
+    const nights = Math.round(
+      (Date.UTC(
+        endDate.getUTCFullYear(),
+        endDate.getUTCMonth(),
+        endDate.getUTCDate(),
+      ) -
+        Date.UTC(
+          startDate.getUTCFullYear(),
+          startDate.getUTCMonth(),
+          startDate.getUTCDate(),
+        )) /
+        86_400_000,
+    );
+
+    if (endDate <= startDate) {
+      context.addIssue({
+        code: "custom",
+        path: ["endDate"],
+        message: "End date must be after start date.",
+      });
+    } else if (nights < 30) {
+      context.addIssue({
+        code: "custom",
+        path: ["endDate"],
+        message: "Stays must be at least 30 nights.",
+      });
+    }
   });
