@@ -15,6 +15,7 @@ export default async function getReservations(params: Reservation) {
 
   if (listingId) {
     query.listingId = listingId;
+    query.status = { in: ["PENDING", "APPROVED"] };
   }
 
   if (userId) {

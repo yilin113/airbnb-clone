@@ -172,6 +172,7 @@ describe("getReservations", () => {
     expect(prismaMock.reservation.findMany).toHaveBeenCalledWith({
       where: {
         listingId: "listing-1",
+        status: { in: ["PENDING", "APPROVED"] },
         userId: "user-1",
         listing: { userId: "author-1" },
       },

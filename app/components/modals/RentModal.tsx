@@ -49,6 +49,10 @@ const RentModal = () => {
       bathroomCount: 1,
       imageSrc: "",
       price: 1,
+      utilitiesFee: 0,
+      managementFee: 0,
+      cleaningFee: 0,
+      deposit: 0,
       title: "",
       description: "",
     },
@@ -248,6 +252,46 @@ const RentModal = () => {
         <Input
           id="price"
           label="Monthly rent (JPY)"
+          formatPrice
+          type="number"
+          disabled={isLoading}
+          register={register}
+          errors={errors}
+          required
+        />
+        <Input
+          id="utilitiesFee"
+          label="Monthly utilities (JPY)"
+          formatPrice
+          type="number"
+          disabled={isLoading}
+          register={register}
+          errors={errors}
+          required
+        />
+        <Input
+          id="managementFee"
+          label="Monthly management fee (JPY)"
+          formatPrice
+          type="number"
+          disabled={isLoading}
+          register={register}
+          errors={errors}
+          required
+        />
+        <Input
+          id="cleaningFee"
+          label="One-time cleaning fee (JPY)"
+          formatPrice
+          type="number"
+          disabled={isLoading}
+          register={register}
+          errors={errors}
+          required
+        />
+        <Input
+          id="deposit"
+          label="Refundable deposit (JPY)"
           formatPrice
           type="number"
           disabled={isLoading}

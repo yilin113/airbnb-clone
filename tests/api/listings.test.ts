@@ -31,6 +31,10 @@ const listingBody = {
   guestCount: 4,
   location: { value: "PE" },
   price: "120",
+  utilitiesFee: "20",
+  managementFee: "10",
+  cleaningFee: "30",
+  deposit: "100",
 };
 
 beforeEach(() => {
@@ -85,6 +89,10 @@ describe("POST /api/listings", () => {
         guestCount: 4,
         locationValue: "PE",
         price: 120,
+        utilitiesFee: 20,
+        managementFee: 10,
+        cleaningFee: 30,
+        deposit: 100,
         userId: user.id,
       },
     });

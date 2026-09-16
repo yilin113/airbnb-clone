@@ -1,7 +1,10 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DELETE } from "@/app/api/reservations/[reservationId]/route";
+import {
+  DELETE,
+  PATCH,
+} from "@/app/api/reservations/[reservationId]/route";
 import { POST } from "@/app/api/reservations/route";
 import { makeListing, makeReservation, makeUser } from "../helpers/factories";
 import { prismaMock } from "../helpers/prisma";
@@ -40,9 +43,13 @@ beforeEach(() => {
   prismaMock.$transaction.mockClear();
   prismaMock.listing.findUnique.mockReset();
   prismaMock.reservation.findFirst.mockReset();
+  prismaMock.reservation.findUnique.mockReset();
   prismaMock.reservation.create.mockReset();
+  prismaMock.reservation.updateMany.mockReset();
+  prismaMock.reservation.delete.mockReset();
   prismaMock.reservation.deleteMany.mockReset();
   prismaMock.availabilityDay.createMany.mockReset();
+  prismaMock.availabilityDay.deleteMany.mockReset();
 });
 
 describe("POST /api/reservations", () => {
@@ -245,44 +252,209 @@ describe("POST /api/reservations", () => {
   });
 });
 
+describe("PATCH /api/reservations/[reservationId]", () => {
+  const request = (decision: unknown) =>
+    new Request("http://localhost/api/reservations/r-1", {
+      method: "PATCH",
+      body: JSON.stringify({ decision }),
+    });
+
+  it("requires authentication", async () => {
+    getCurrentUser.mockResolvedValue(null);
+
+    const response = await PATCH(request("APPROVED"), {
+      params: Promise.resolve({ reservationId: "r-1" }),
+    });
+
+    expect(response.status).toBe(401);
+  });
+
+  it("requires a reservation id", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+
+    const response = await PATCH(request("APPROVED"), {
+      params: Promise.resolve({}),
+    });
+
+    expect(response.status).toBe(400);
+  });
+
+  it("validates the decision", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+
+    const response = await PATCH(request("MAYBE"), {
+      params: Promise.resolve({ reservationId: "r-1" }),
+    });
+
+    expect(response.status).toBe(422);
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("does not disclose reservations owned by another host", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+    prismaMock.reservation.findFirst.mockResolvedValue(null);
+
+    const response = await PATCH(request("APPROVED"), {
+      params: Promise.resolve({ reservationId: "r-1" }),
+    });
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "RESERVATION_NOT_FOUND" },
+    });
+  });
+
+  it("only permits decisions on pending requests", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+    prismaMock.reservation.findFirst.mockResolvedValue(
+      makeReservation({ status: "APPROVED" }),
+    );
+
+    const response = await PATCH(request("DECLINED"), {
+      params: Promise.resolve({ reservationId: "r-1" }),
+    });
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "INVALID_RESERVATION_STATE" },
+    });
+  });
+
+  it("handles a competing decision safely", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+    prismaMock.reservation.findFirst.mockResolvedValue(makeReservation());
+    prismaMock.reservation.updateMany.mockResolvedValue({ count: 0 });
+
+    const response = await PATCH(request("APPROVED"), {
+      params: Promise.resolve({ reservationId: "r-1" }),
+    });
+
+    expect(response.status).toBe(409);
+  });
+
+  it("lets the host approve a pending request and keeps its locks", async () => {
+    const pending = makeReservation();
+    const approved = makeReservation({ status: "APPROVED" });
+    getCurrentUser.mockResolvedValue(makeUser());
+    prismaMock.reservation.findFirst.mockResolvedValue(pending);
+    prismaMock.reservation.updateMany.mockResolvedValue({ count: 1 });
+    prismaMock.reservation.findUnique.mockResolvedValue(approved);
+
+    const response = await PATCH(request("APPROVED"), {
+      params: Promise.resolve({ reservationId: "r-1" }),
+    });
+
+    expect(prismaMock.reservation.findFirst).toHaveBeenCalledWith({
+      where: { id: "r-1", listing: { userId: "user-1" } },
+    });
+    expect(prismaMock.reservation.updateMany).toHaveBeenCalledWith({
+      where: { id: "r-1", status: "PENDING" },
+      data: { status: "APPROVED" },
+    });
+    expect(prismaMock.availabilityDay.deleteMany).not.toHaveBeenCalled();
+    await expect(response.json()).resolves.toMatchObject({
+      status: "APPROVED",
+    });
+  });
+
+  it("lets the host decline a request and releases its locks", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+    prismaMock.reservation.findFirst.mockResolvedValue(makeReservation());
+    prismaMock.reservation.updateMany.mockResolvedValue({ count: 1 });
+    prismaMock.reservation.findUnique.mockResolvedValue(
+      makeReservation({ status: "DECLINED" }),
+    );
+
+    const response = await PATCH(request("DECLINED"), {
+      params: Promise.resolve({ reservationId: "r-1" }),
+    });
+
+    expect(prismaMock.availabilityDay.deleteMany).toHaveBeenCalledWith({
+      where: { reservationId: "r-1" },
+    });
+    expect(response.status).toBe(200);
+  });
+
+  it("returns a safe error when the decision fails", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+    prismaMock.reservation.findFirst.mockRejectedValue(new Error("db down"));
+
+    const response = await PATCH(request("APPROVED"), {
+      params: Promise.resolve({ reservationId: "r-1" }),
+    });
+
+    expect(response.status).toBe(500);
+  });
+});
+
 describe("DELETE /api/reservations/[reservationId]", () => {
   const request = new Request("http://localhost/api/reservations/r-1", {
     method: "DELETE",
   });
 
-  it("errors when signed out", async () => {
+  it("requires authentication", async () => {
     getCurrentUser.mockResolvedValue(null);
 
     const response = await DELETE(request, {
       params: Promise.resolve({ reservationId: "r-1" }),
     });
 
-    expect(response.type).toBe("error");
+    expect(response.status).toBe(401);
   });
 
-  it("rejects a missing id", async () => {
+  it("requires a reservation id", async () => {
     getCurrentUser.mockResolvedValue(makeUser());
 
-    await expect(
-      DELETE(request, { params: Promise.resolve({}) }),
-    ).rejects.toThrow("Invalid ID");
+    const response = await DELETE(request, { params: Promise.resolve({}) });
+
+    expect(response.status).toBe(400);
   });
 
-  it("lets either the guest or the host cancel", async () => {
-    const user = makeUser();
-    getCurrentUser.mockResolvedValue(user);
-    prismaMock.reservation.deleteMany.mockResolvedValue({ count: 1 });
+  it("returns not found when the user is neither guest nor host", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+    prismaMock.reservation.findFirst.mockResolvedValue(null);
 
     const response = await DELETE(request, {
       params: Promise.resolve({ reservationId: "r-1" }),
     });
 
-    expect(prismaMock.reservation.deleteMany).toHaveBeenCalledWith({
+    expect(response.status).toBe(404);
+  });
+
+  it("lets the guest or host cancel and releases every lock", async () => {
+    const user = makeUser();
+    const reservation = makeReservation();
+    getCurrentUser.mockResolvedValue(user);
+    prismaMock.reservation.findFirst.mockResolvedValue(reservation);
+    prismaMock.reservation.delete.mockResolvedValue(reservation);
+
+    const response = await DELETE(request, {
+      params: Promise.resolve({ reservationId: "r-1" }),
+    });
+
+    expect(prismaMock.reservation.findFirst).toHaveBeenCalledWith({
       where: {
         id: "r-1",
         OR: [{ userId: user.id }, { listing: { userId: user.id } }],
       },
     });
-    await expect(response.json()).resolves.toEqual({ count: 1 });
+    expect(prismaMock.availabilityDay.deleteMany).toHaveBeenCalledWith({
+      where: { reservationId: "r-1" },
+    });
+    expect(prismaMock.reservation.delete).toHaveBeenCalledWith({
+      where: { id: "r-1" },
+    });
+    await expect(response.json()).resolves.toMatchObject({ id: reservation.id });
+  });
+
+  it("returns a safe error when cancellation fails", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+    prismaMock.reservation.findFirst.mockRejectedValue(new Error("db down"));
+
+    const response = await DELETE(request, {
+      params: Promise.resolve({ reservationId: "r-1" }),
+    });
+
+    expect(response.status).toBe(500);
   });
 });

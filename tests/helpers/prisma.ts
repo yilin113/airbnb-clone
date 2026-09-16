@@ -28,10 +28,14 @@ export const prismaMock = {
   reservation: {
     findMany: vi.fn(),
     findFirst: vi.fn(),
+    findUnique: vi.fn(),
     create: vi.fn(),
+    updateMany: vi.fn(),
+    delete: vi.fn(),
     deleteMany: vi.fn(),
   },
   availabilityDay: {
     createMany: vi.fn(),
+    deleteMany: vi.fn(),
   },
 };

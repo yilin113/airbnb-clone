@@ -161,6 +161,10 @@ describe("RentModal", () => {
           title: "Sunny loft",
           description: "Very sunny",
           price: "120",
+          utilitiesFee: 0,
+          managementFee: 0,
+          cleaningFee: 0,
+          deposit: 0,
         }),
       );
     });

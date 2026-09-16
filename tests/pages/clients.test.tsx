@@ -10,7 +10,9 @@ import TripsClient from "@/app/trips/TripsClient";
 import { makeListing, makeReservation, makeUser } from "../helpers/factories";
 import { routerMock } from "../helpers/mocks";
 
-vi.mock("axios", () => ({ default: { delete: vi.fn(), post: vi.fn() } }));
+vi.mock("axios", () => ({
+  default: { delete: vi.fn(), patch: vi.fn(), post: vi.fn() },
+}));
 
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
 vi.mock("react-hot-toast", () => ({ toast, default: toast }));
@@ -18,9 +20,14 @@ vi.mock("react-hot-toast", () => ({ toast, default: toast }));
 const mockedAxios = vi.mocked(axios);
 
 const reservation = { ...makeReservation(), listing: makeListing() };
+const approvedReservation = {
+  ...makeReservation({ status: "APPROVED" }),
+  listing: makeListing(),
+};
 
 beforeEach(() => {
   mockedAxios.delete.mockReset();
+  mockedAxios.patch.mockReset();
 });
 
 describe("FavoritesClient", () => {
@@ -96,7 +103,7 @@ describe("ReservationsClient", () => {
     render(
       <ReservationsClient
         currentUser={makeUser()}
-        reservations={[reservation]}
+        reservations={[approvedReservation]}
       />,
     );
 
@@ -117,12 +124,74 @@ describe("ReservationsClient", () => {
     render(
       <ReservationsClient
         currentUser={makeUser()}
-        reservations={[reservation]}
+        reservations={[approvedReservation]}
       />,
     );
 
     await userEvent.click(
       screen.getByRole("button", { name: "Cancel guest reservation" }),
+    );
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+    });
+  });
+
+  it("approves a pending booking request", async () => {
+    mockedAxios.patch.mockResolvedValue({ data: {} });
+    render(
+      <ReservationsClient
+        currentUser={makeUser()}
+        reservations={[reservation]}
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Approve request" }),
+    );
+
+    await waitFor(() => {
+      expect(mockedAxios.patch).toHaveBeenCalledWith(
+        "/api/reservations/reservation-1",
+        { decision: "APPROVED" },
+      );
+    });
+    expect(toast.success).toHaveBeenCalledWith("Booking request approved");
+  });
+
+  it("declines a pending booking request", async () => {
+    mockedAxios.patch.mockResolvedValue({ data: {} });
+    render(
+      <ReservationsClient
+        currentUser={makeUser()}
+        reservations={[reservation]}
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Decline request" }),
+    );
+
+    await waitFor(() => {
+      expect(mockedAxios.patch).toHaveBeenCalledWith(
+        "/api/reservations/reservation-1",
+        { decision: "DECLINED" },
+      );
+    });
+    expect(toast.success).toHaveBeenCalledWith("Booking request declined");
+  });
+
+  it("reports a failed booking decision", async () => {
+    mockedAxios.patch.mockRejectedValue(new Error("network"));
+    render(
+      <ReservationsClient
+        currentUser={makeUser()}
+        reservations={[reservation]}
+      />,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Approve request" }),
     );
 
     await waitFor(() => {

@@ -28,6 +28,10 @@ export async function POST(request: Request) {
     guestCount,
     location,
     price,
+    utilitiesFee,
+    managementFee,
+    cleaningFee,
+    deposit,
   } = parsed.data;
 
   const listing = await prisma.listing.create({
@@ -41,6 +45,10 @@ export async function POST(request: Request) {
       guestCount,
       locationValue: location.value,
       price,
+      utilitiesFee,
+      managementFee,
+      cleaningFee,
+      deposit,
       userId: currentUser.id,
     },
   });

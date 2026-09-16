@@ -6,6 +6,8 @@ type ApiErrorCode =
   | "VALIDATION_ERROR"
   | "UNAUTHORIZED"
   | "LISTING_NOT_FOUND"
+  | "RESERVATION_NOT_FOUND"
+  | "INVALID_RESERVATION_STATE"
   | "BOOKING_CONFLICT"
   | "EMAIL_ALREADY_EXISTS"
   | "INTERNAL_ERROR";
@@ -37,6 +39,10 @@ export function apiError(
 
 export function unauthorized() {
   return apiError(401, "UNAUTHORIZED", "Authentication is required.");
+}
+
+export function reservationNotFound() {
+  return apiError(404, "RESERVATION_NOT_FOUND", "Reservation was not found.");
 }
 
 export async function parseJson<T>(request: Request, schema: z.ZodType<T>) {

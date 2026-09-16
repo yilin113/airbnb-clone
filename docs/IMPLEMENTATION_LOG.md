@@ -83,3 +83,36 @@
 - Host form controls for utilities, management, cleaning, and deposit amounts.
 - Full Traditional Chinese product copy and Japan prefecture/city/station data.
 - Formal payment collection and deposit settlement.
+
+## 2026-09-16 — Phase 1B: host decisions and listing fee inputs
+
+### Scope
+
+- Added host form inputs and API validation for monthly utilities, monthly
+  management, one-time cleaning, and refundable deposit amounts.
+- Added host-only approve and decline transitions for pending booking requests.
+- Protected decisions with a conditional pending-state update so two concurrent
+  decisions cannot both succeed.
+- Kept availability locks when a request is approved and released them in the
+  same transaction when a request is declined.
+- Reworked guest/host cancellation to verify ownership and remove availability
+  locks atomically before deleting the reservation.
+- Restricted listing calendar queries to pending and approved reservations, so
+  declined requests no longer block dates.
+- Added request status display and approve/decline controls to the host
+  reservations page.
+
+### Verification
+
+- `pnpm test`: 29 files, 253 tests passed.
+- `pnpm test:coverage`: 100% statements, branches, functions, and lines.
+- `pnpm lint`: zero errors; the pre-existing React Compiler warning in
+  `RentModal.tsx` remains.
+- `pnpm typecheck`: passed.
+
+### Deliberately deferred to Phase 2
+
+- Traditional Chinese interface copy and status labels.
+- Japan-only prefecture, city, and station location model.
+- Email or in-app notifications for booking decisions.
+- Payment collection and deposit settlement.

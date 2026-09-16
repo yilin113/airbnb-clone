@@ -18,6 +18,14 @@ export const listingSchema = z.object({
     value: z.string().trim().min(1).max(20),
   }),
   price: z.coerce.number().int().min(1).max(100_000_000),
+  utilitiesFee: z.coerce.number().int().min(0).max(100_000_000),
+  managementFee: z.coerce.number().int().min(0).max(100_000_000),
+  cleaningFee: z.coerce.number().int().min(0).max(100_000_000),
+  deposit: z.coerce.number().int().min(0).max(100_000_000),
+});
+
+export const reservationDecisionSchema = z.object({
+  decision: z.enum(["APPROVED", "DECLINED"]),
 });
 
 export const reservationSchema = z

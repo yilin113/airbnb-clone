@@ -8,6 +8,7 @@ import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import ListingCard from "../components/listings/ListingCard";
+import Button from "../components/Button";
 
 interface ReservationsClientProps {
   reservations: (Reservation & { listing: Listing })[];
@@ -20,6 +21,31 @@ const ReservationsClient: React.FC<ReservationsClientProps> = ({
 }) => {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState("");
+  const [updatingId, setUpdatingId] = useState("");
+
+  const onDecision = useCallback(
+    async (id: string, decision: "APPROVED" | "DECLINED") => {
+      setUpdatingId(id);
+
+      axios
+        .patch(`/api/reservations/${id}`, { decision })
+        .then(() => {
+          toast.success(
+            decision === "APPROVED"
+              ? "Booking request approved"
+              : "Booking request declined",
+          );
+          router.refresh();
+        })
+        .catch(() => {
+          toast.error("Something went wrong");
+        })
+        .finally(() => {
+          setUpdatingId("");
+        });
+    },
+    [router],
+  );
 
   const onCancel = useCallback(
     async (id: string) => {
@@ -58,16 +84,40 @@ const ReservationsClient: React.FC<ReservationsClientProps> = ({
         "
       >
         {reservations.map((reservation) => (
-          <ListingCard
-            key={reservation.id}
-            data={reservation.listing}
-            reservation={reservation}
-            actionId={reservation.id}
-            onAction={onCancel}
-            disabled={deletingId === reservation.id}
-            actionLabel="Cancel guest reservation"
-            currentUser={currentUser}
-          />
+          <div key={reservation.id} className="flex flex-col gap-2">
+            <ListingCard
+              data={reservation.listing}
+              reservation={reservation}
+              actionId={reservation.id}
+              onAction={
+                reservation.status === "APPROVED" ? onCancel : undefined
+              }
+              disabled={deletingId === reservation.id}
+              actionLabel={
+                reservation.status === "APPROVED"
+                  ? "Cancel guest reservation"
+                  : undefined
+              }
+              currentUser={currentUser}
+            />
+            {reservation.status === "PENDING" && (
+              <div className="flex flex-col gap-2">
+                <Button
+                  small
+                  label="Approve request"
+                  disabled={updatingId === reservation.id}
+                  onClick={() => onDecision(reservation.id, "APPROVED")}
+                />
+                <Button
+                  small
+                  outline
+                  label="Decline request"
+                  disabled={updatingId === reservation.id}
+                  onClick={() => onDecision(reservation.id, "DECLINED")}
+                />
+              </div>
+            )}
+          </div>
         ))}
       </div>
     </Container>
