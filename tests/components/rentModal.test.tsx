@@ -32,7 +32,7 @@ beforeEach(() => {
 });
 
 const next = () =>
-  userEvent.click(screen.getByRole("button", { name: "Next" }));
+  userEvent.click(screen.getByRole("button", { name: "下一步" }));
 
 async function walkToPrice() {
   await userEvent.click(screen.getByText("Beach"));
@@ -67,10 +67,10 @@ describe("RentModal", () => {
     render(<RentModal />);
 
     expect(
-      screen.getByText("Which category best describes your place?"),
+      screen.getByText("這間房源屬於哪一類？"),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Back" }),
+      screen.queryByRole("button", { name: "返回" }),
     ).not.toBeInTheDocument();
   });
 
@@ -78,33 +78,33 @@ describe("RentModal", () => {
     render(<RentModal />);
 
     await next();
-    expect(screen.getByText("Where's your place located?")).toBeInTheDocument();
+    expect(screen.getByText("房源位於日本哪裡？")).toBeInTheDocument();
 
     const country = screen.getByRole("combobox");
     await userEvent.click(country);
-    await userEvent.type(country, "Peru");
+    await userEvent.type(country, "新宿");
     await userEvent.keyboard("{Enter}");
 
     await next();
     expect(
-      screen.getByText("Share some details about your place"),
+      screen.getByText("提供房源基本資料"),
     ).toBeInTheDocument();
 
     await next();
     expect(
-      screen.getByText("Upload some photos of your place"),
+      screen.getByText("上傳房源照片"),
     ).toBeInTheDocument();
 
     await next();
     expect(
-      screen.getByText("Describe your place to guests"),
+      screen.getByText("向房客介紹你的房源"),
     ).toBeInTheDocument();
 
     // Title and description are required, so the step will not advance until
     // they are filled in.
     await next();
     expect(
-      screen.getByText("Describe your place to guests"),
+      screen.getByText("向房客介紹你的房源"),
     ).toBeInTheDocument();
 
     await userEvent.type(
@@ -118,13 +118,13 @@ describe("RentModal", () => {
 
     await next();
     expect(
-      screen.getByText("Now let's set up your monthly rent"),
+      screen.getByText("設定月租與其他費用"),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Publish" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "刊登房源" })).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: "Back" }));
+    await userEvent.click(screen.getByRole("button", { name: "返回" }));
     expect(
-      screen.getByText("Describe your place to guests"),
+      screen.getByText("向房客介紹你的房源"),
     ).toBeInTheDocument();
   });
 
@@ -150,7 +150,7 @@ describe("RentModal", () => {
     render(<RentModal />);
 
     await walkToPrice();
-    await userEvent.click(screen.getByRole("button", { name: "Publish" }));
+    await userEvent.click(screen.getByRole("button", { name: "刊登房源" }));
 
     await waitFor(() => {
       expect(mockedAxios.post).toHaveBeenCalledWith(
@@ -168,7 +168,7 @@ describe("RentModal", () => {
         }),
       );
     });
-    expect(toast.success).toHaveBeenCalledWith("Listing created successfully");
+    expect(toast.success).toHaveBeenCalledWith("房源已建立");
     expect(routerMock.refresh).toHaveBeenCalled();
     expect(useRentModal.getState().isOpen).toBe(false);
   });
@@ -178,10 +178,10 @@ describe("RentModal", () => {
     render(<RentModal />);
 
     await walkToPrice();
-    await userEvent.click(screen.getByRole("button", { name: "Publish" }));
+    await userEvent.click(screen.getByRole("button", { name: "刊登房源" }));
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+      expect(toast.error).toHaveBeenCalledWith("發生錯誤，請稍後再試");
     });
     expect(useRentModal.getState().isOpen).toBe(true);
   });

@@ -11,8 +11,8 @@ interface EmptyStateProps {
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
-  title = "No exact matches",
-  subtitle = "Try adjusting your search or filters to find what you're looking for.",
+  title = "找不到符合條件的房源",
+  subtitle = "請調整搜尋日期、地點或入住條件。",
   showReset = false,
 }) => {
   const router = useRouter();
@@ -33,7 +33,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         {showReset && (
           <Button
             outline
-            label="Remove all filters"
+            label="清除所有篩選"
             onClick={() => router.push("/")}
           />
         )}

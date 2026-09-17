@@ -1,15 +1,10 @@
 "use client";
 
 import useCountries from "@/app/hooks/useCountries";
+import type { JapanLocation } from "@/app/data/japanLocations";
 import Select from "react-select";
 
-export type CountrySelectValue = {
-  label: string;
-  value: string;
-  flag: string;
-  latlng: number[];
-  region: string;
-};
+export type CountrySelectValue = JapanLocation;
 
 interface CountrySelectProps {
   value?: CountrySelectValue;
@@ -22,7 +17,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({ value, onChange }) => {
   return (
     <div className="flex flex-col gap-2">
       <Select
-        placeholder="Select a country"
+        placeholder="選擇日本城市或車站"
         isClearable
         options={getAll()}
         value={value}

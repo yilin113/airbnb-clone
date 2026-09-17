@@ -15,8 +15,8 @@ const ReservationsPage = async () => {
     return (
       <ClientOnly>
         <EmptyState
-          title="You must be signed in"
-          subtitle="You must be signed in to view this page"
+          title="請先登入"
+          subtitle="登入後即可查看房客申請。"
         />
       </ClientOnly>
     );
@@ -26,8 +26,8 @@ const ReservationsPage = async () => {
     return (
       <ClientOnly>
         <EmptyState
-          title="No reservations found"
-          subtitle="You have no reservations scheduled"
+          title="目前沒有房客申請"
+          subtitle="新的入住申請會顯示在這裡。"
         />
       </ClientOnly>
     );

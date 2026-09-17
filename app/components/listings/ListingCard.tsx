@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { format } from "date-fns";
+import { zhTW } from "date-fns/locale";
 
 import useCountries from "@/app/hooks/useCountries";
 import { Listing, Reservation, User } from "@prisma/client";
@@ -64,7 +65,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
     const start = new Date(reservation.startDate);
     const end = new Date(reservation.endDate);
 
-    return `${format(start, "PP")} - ${format(end, "PP")}`;
+    return `${format(start, "PPP", { locale: zhTW })}－${format(end, "PPP", { locale: zhTW })}`;
   }, [reservation]);
 
   return (
@@ -114,12 +115,17 @@ const ListingCard: React.FC<ListingCardProps> = ({
         </div>
         {reservation && (
           <div className="text-sm font-semibold text-neutral-600">
-            {reservation.status}
+            {{
+              PENDING: "待房東審核",
+              APPROVED: "已核准",
+              DECLINED: "已拒絕",
+              CANCELLED: "已取消",
+            }[reservation.status]}
           </div>
         )}
         <div className="flex flex-row items-center gap-1">
           <div className="font-semibold">¥ {price}</div>
-          {!reservation && <div className="font-light">month</div>}
+          {!reservation && <div className="font-light">／月</div>}
         </div>
         {onAction && actionLabel && (
           <Button

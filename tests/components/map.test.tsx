@@ -30,12 +30,12 @@ vi.mock("react-leaflet", () => ({
 }));
 
 describe("Map", () => {
-  it("falls back to a world view when no centre is given", () => {
+  it("falls back to a Japan view when no centre is given", () => {
     render(<Map />);
 
     const map = screen.getByTestId("map");
-    expect(map).toHaveAttribute("data-center", "[-12.04318,-77.02824]");
-    expect(map).toHaveAttribute("data-zoom", "2");
+    expect(map).toHaveAttribute("data-center", "[36.2048,138.2529]");
+    expect(map).toHaveAttribute("data-zoom", "5");
     expect(screen.queryByTestId("marker")).not.toBeInTheDocument();
     expect(screen.getByTestId("tiles")).toHaveAttribute(
       "data-url",
@@ -48,7 +48,7 @@ describe("Map", () => {
 
     const map = screen.getByTestId("map");
     expect(map).toHaveAttribute("data-center", "[-10,-76]");
-    expect(map).toHaveAttribute("data-zoom", "4");
+    expect(map).toHaveAttribute("data-zoom", "13");
     expect(screen.getByTestId("marker")).toHaveAttribute(
       "data-position",
       "[-10,-76]",

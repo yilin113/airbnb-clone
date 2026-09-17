@@ -39,7 +39,7 @@ describe("FavoritesClient", () => {
       />,
     );
 
-    expect(screen.getByText("Favorites")).toBeInTheDocument();
+    expect(screen.getByText("收藏房源")).toBeInTheDocument();
     expect(screen.getAllByAltText("Listing")).toHaveLength(2);
   });
 });
@@ -52,7 +52,7 @@ describe("PropertiesClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Delete property" }),
+      screen.getByRole("button", { name: "刪除房源" }),
     );
 
     await waitFor(() => {
@@ -60,7 +60,7 @@ describe("PropertiesClient", () => {
         "/api/listings/listing-1",
       );
     });
-    expect(toast.success).toHaveBeenCalledWith("Listing deleted successfully");
+    expect(toast.success).toHaveBeenCalledWith("房源已刪除");
     expect(routerMock.refresh).toHaveBeenCalled();
   });
 
@@ -73,7 +73,7 @@ describe("PropertiesClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Delete property" }),
+      screen.getByRole("button", { name: "刪除房源" }),
     );
 
     await waitFor(() => {
@@ -88,11 +88,11 @@ describe("PropertiesClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Delete property" }),
+      screen.getByRole("button", { name: "刪除房源" }),
     );
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+      expect(toast.error).toHaveBeenCalledWith("發生錯誤，請稍後再試");
     });
   });
 });
@@ -108,7 +108,7 @@ describe("ReservationsClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Cancel guest reservation" }),
+      screen.getByRole("button", { name: "取消房客預訂" }),
     );
 
     await waitFor(() => {
@@ -116,7 +116,7 @@ describe("ReservationsClient", () => {
         "/api/reservations/reservation-1",
       );
     });
-    expect(toast.success).toHaveBeenCalledWith("Reservation cancelled");
+    expect(toast.success).toHaveBeenCalledWith("預訂已取消");
   });
 
   it("reports a failed cancellation", async () => {
@@ -129,11 +129,11 @@ describe("ReservationsClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Cancel guest reservation" }),
+      screen.getByRole("button", { name: "取消房客預訂" }),
     );
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+      expect(toast.error).toHaveBeenCalledWith("發生錯誤，請稍後再試");
     });
   });
 
@@ -147,7 +147,7 @@ describe("ReservationsClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Approve request" }),
+      screen.getByRole("button", { name: "核准申請" }),
     );
 
     await waitFor(() => {
@@ -156,7 +156,7 @@ describe("ReservationsClient", () => {
         { decision: "APPROVED" },
       );
     });
-    expect(toast.success).toHaveBeenCalledWith("Booking request approved");
+    expect(toast.success).toHaveBeenCalledWith("已核准入住申請");
   });
 
   it("declines a pending booking request", async () => {
@@ -169,7 +169,7 @@ describe("ReservationsClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Decline request" }),
+      screen.getByRole("button", { name: "拒絕申請" }),
     );
 
     await waitFor(() => {
@@ -178,7 +178,7 @@ describe("ReservationsClient", () => {
         { decision: "DECLINED" },
       );
     });
-    expect(toast.success).toHaveBeenCalledWith("Booking request declined");
+    expect(toast.success).toHaveBeenCalledWith("已拒絕入住申請");
   });
 
   it("reports a failed booking decision", async () => {
@@ -191,11 +191,11 @@ describe("ReservationsClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Approve request" }),
+      screen.getByRole("button", { name: "核准申請" }),
     );
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+      expect(toast.error).toHaveBeenCalledWith("發生錯誤，請稍後再試");
     });
   });
 });
@@ -208,7 +208,7 @@ describe("TripsClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Cancel Reservation" }),
+      screen.getByRole("button", { name: "取消入住申請" }),
     );
 
     await waitFor(() => {
@@ -217,7 +217,7 @@ describe("TripsClient", () => {
       );
     });
     expect(toast.success).toHaveBeenCalledWith(
-      "Reservation cancelled successfully",
+      "入住申請已取消",
     );
   });
 
@@ -230,7 +230,7 @@ describe("TripsClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Cancel Reservation" }),
+      screen.getByRole("button", { name: "取消入住申請" }),
     );
 
     await waitFor(() => {
@@ -245,11 +245,11 @@ describe("TripsClient", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Cancel Reservation" }),
+      screen.getByRole("button", { name: "取消入住申請" }),
     );
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+      expect(toast.error).toHaveBeenCalledWith("發生錯誤，請稍後再試");
     });
   });
 });

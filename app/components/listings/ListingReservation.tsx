@@ -35,7 +35,7 @@ const ListingReservation: React.FC<IListingReservationProps> = ({
     >
       <div className="flex flex-row items-center gap-1 p-4">
         <div className="text-2xl font-semibold">¥ {price}</div>
-        <div className="font-light text-neutral-600">month</div>
+        <div className="font-light text-neutral-600">／月</div>
       </div>
       <hr />
       <Calendar
@@ -45,7 +45,7 @@ const ListingReservation: React.FC<IListingReservationProps> = ({
       />
       <hr />
       <div className="p-4">
-        <Button disabled={disabled} onClick={onSubmit} label="Reserve" />
+        <Button disabled={disabled} onClick={onSubmit} label="送出入住申請" />
       </div>
       <div
         className="
@@ -58,7 +58,7 @@ const ListingReservation: React.FC<IListingReservationProps> = ({
         text-lg
         "
       >
-        <div>Total</div>
+        <div>預估總額</div>
         <div>¥ {totalPrice}</div>
       </div>
     </div>

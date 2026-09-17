@@ -30,7 +30,7 @@ beforeEach(() => {
 });
 
 const next = () =>
-  userEvent.click(screen.getByRole("button", { name: "Next" }));
+  userEvent.click(screen.getByRole("button", { name: "下一步" }));
 
 describe("SearchModal", () => {
   it("stays hidden while its store is closed", () => {
@@ -43,9 +43,9 @@ describe("SearchModal", () => {
   it("starts on the location step with no way back", () => {
     render(<SearchModal />);
 
-    expect(screen.getByText("Where do you wanna go?")).toBeInTheDocument();
+    expect(screen.getByText("想住在日本哪裡？")).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Back" }),
+      screen.queryByRole("button", { name: "返回" }),
     ).not.toBeInTheDocument();
   });
 
@@ -54,11 +54,11 @@ describe("SearchModal", () => {
 
     const country = screen.getByRole("combobox");
     await userEvent.click(country);
-    await userEvent.type(country, "Peru");
+    await userEvent.type(country, "新宿");
     await userEvent.keyboard("{Enter}");
 
     await next();
-    expect(screen.getByText("When do you plan to go?")).toBeInTheDocument();
+    expect(screen.getByText("預計何時入住？")).toBeInTheDocument();
 
     dateRange.onChange?.({
       selection: {
@@ -69,11 +69,11 @@ describe("SearchModal", () => {
     });
 
     await next();
-    expect(screen.getByText("More information")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument();
+    expect(screen.getByText("住宿需求")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "搜尋" })).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: "Back" }));
-    expect(screen.getByText("When do you plan to go?")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "返回" }));
+    expect(screen.getByText("預計何時入住？")).toBeInTheDocument();
   });
 
   it("edits all three counters", async () => {
@@ -98,7 +98,7 @@ describe("SearchModal", () => {
 
     await next();
     await next();
-    await userEvent.click(screen.getByRole("button", { name: "Search" }));
+    await userEvent.click(screen.getByRole("button", { name: "搜尋" }));
 
     await waitFor(() => {
       expect(routerMock.push).toHaveBeenCalledTimes(1);
@@ -119,7 +119,7 @@ describe("SearchModal", () => {
 
     await next();
     await next();
-    await userEvent.click(screen.getByRole("button", { name: "Search" }));
+    await userEvent.click(screen.getByRole("button", { name: "搜尋" }));
 
     await waitFor(() => {
       expect(routerMock.push).toHaveBeenCalledTimes(1);
@@ -136,7 +136,7 @@ describe("SearchModal", () => {
     });
 
     await next();
-    await userEvent.click(screen.getByRole("button", { name: "Search" }));
+    await userEvent.click(screen.getByRole("button", { name: "搜尋" }));
 
     await waitFor(() => {
       expect(routerMock.push).toHaveBeenCalledTimes(1);
@@ -153,7 +153,7 @@ describe("SearchModal", () => {
 
     await next();
     await next();
-    await userEvent.click(screen.getByRole("button", { name: "Search" }));
+    await userEvent.click(screen.getByRole("button", { name: "搜尋" }));
 
     await waitFor(() => {
       expect(routerMock.push).toHaveBeenCalledTimes(1);

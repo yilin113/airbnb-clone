@@ -68,9 +68,6 @@ importers:
       react-spinners:
         specifier: ^0.17.0
         version: 0.17.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      world-countries:
-        specifier: ^5.1.0
-        version: 5.1.0
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -3256,9 +3253,6 @@ packages:
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
-
-  world-countries@5.1.0:
-    resolution: {integrity: sha512-CXR6EBvTbArDlDDIWU3gfKb7Qk0ck2WNZ234b/A0vuecPzIfzzxH+O6Ejnvg1sT8XuiZjVlzOH0h08ZtaO7g0w==}
 
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
@@ -6553,8 +6547,6 @@ snapshots:
       stackback: 0.0.2
 
   word-wrap@1.2.5: {}
-
-  world-countries@5.1.0: {}
 
   xml-name-validator@5.0.0: {}
 

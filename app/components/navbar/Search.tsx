@@ -22,7 +22,7 @@ const Search = () => {
       return getByValue(locationValue as string)?.label;
     }
 
-    return "Anywhere";
+    return "日本地點";
   }, [locationValue, getByValue]);
 
   const durationLabel = useMemo(() => {
@@ -35,18 +35,18 @@ const Search = () => {
         diff = 1;
       }
 
-      return `${diff} Days`;
+      return `${diff} 晚`;
     }
 
-    return "Any Week";
+    return "入住日期";
   }, [startDate, endDate]);
 
   const guestLabel = useMemo(() => {
     if (guestCount) {
-      return `${guestCount} Guests`;
+      return `${guestCount} 位房客`;
     }
 
-    return "Add Guests";
+    return "新增房客";
   }, [guestCount]);
 
   return (

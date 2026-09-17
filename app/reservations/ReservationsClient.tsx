@@ -32,13 +32,13 @@ const ReservationsClient: React.FC<ReservationsClientProps> = ({
         .then(() => {
           toast.success(
             decision === "APPROVED"
-              ? "Booking request approved"
-              : "Booking request declined",
+              ? "已核准入住申請"
+              : "已拒絕入住申請",
           );
           router.refresh();
         })
         .catch(() => {
-          toast.error("Something went wrong");
+          toast.error("發生錯誤，請稍後再試");
         })
         .finally(() => {
           setUpdatingId("");
@@ -54,11 +54,11 @@ const ReservationsClient: React.FC<ReservationsClientProps> = ({
       axios
         .delete(`/api/reservations/${id}`)
         .then(() => {
-          toast.success("Reservation cancelled");
+          toast.success("預訂已取消");
           router.refresh();
         })
         .catch(() => {
-          toast.error("Something went wrong");
+          toast.error("發生錯誤，請稍後再試");
         })
         .finally(() => {
           setDeletingId("");
@@ -69,7 +69,7 @@ const ReservationsClient: React.FC<ReservationsClientProps> = ({
 
   return (
     <Container>
-      <Heading title="Reservations" subtitle="Manage your reservations" />
+      <Heading title="房客申請" subtitle="審核與管理房源的入住申請" />
       <div
         className="
           mt-10
@@ -95,7 +95,7 @@ const ReservationsClient: React.FC<ReservationsClientProps> = ({
               disabled={deletingId === reservation.id}
               actionLabel={
                 reservation.status === "APPROVED"
-                  ? "Cancel guest reservation"
+                  ? "取消房客預訂"
                   : undefined
               }
               currentUser={currentUser}
@@ -104,14 +104,14 @@ const ReservationsClient: React.FC<ReservationsClientProps> = ({
               <div className="flex flex-col gap-2">
                 <Button
                   small
-                  label="Approve request"
+                  label="核准申請"
                   disabled={updatingId === reservation.id}
                   onClick={() => onDecision(reservation.id, "APPROVED")}
                 />
                 <Button
                   small
                   outline
-                  label="Decline request"
+                  label="拒絕申請"
                   disabled={updatingId === reservation.id}
                   onClick={() => onDecision(reservation.id, "DECLINED")}
                 />

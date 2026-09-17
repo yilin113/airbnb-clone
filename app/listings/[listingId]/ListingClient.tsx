@@ -104,7 +104,7 @@ const ListingClient: React.FC<IListingClientProps> = ({
         listingId: listing.id,
       })
       .then(() => {
-        toast.success("Booking request sent");
+        toast.success("入住申請已送出");
         setDateRange(initialDateRange);
         router.push("/trips");
       })

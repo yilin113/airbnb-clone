@@ -38,12 +38,12 @@ const RegisterModal = () => {
     axios
       .post("/api/register", data)
       .then(() => {
-        toast.success("Account created successfully");
+        toast.success("帳號建立成功");
         registerModal.onClose();
         loginModal.onOpen();
       })
       .catch(() => {
-        toast.error("Something went wrong, please try again later");
+        toast.error("發生錯誤，請稍後再試");
       })
       .finally(() => {
         setIsLoading(false);
@@ -57,10 +57,10 @@ const RegisterModal = () => {
 
   const bodyContent = (
     <div className="flex flex-col gap-4">
-      <Heading title="Welcome to Airbnb" subtitle="Create your account" />
+      <Heading title="歡迎使用日本中期旅居" subtitle="建立你的帳號" />
       <Input
         id="email"
-        label="Email address"
+        label="電子郵件"
         disabled={isLoading}
         register={register}
         errors={errors}
@@ -68,7 +68,7 @@ const RegisterModal = () => {
       />
       <Input
         id="name"
-        label="Name"
+        label="姓名"
         disabled={isLoading}
         register={register}
         errors={errors}
@@ -76,7 +76,7 @@ const RegisterModal = () => {
       />
       <Input
         id="password"
-        label="Password"
+        label="密碼"
         disabled={isLoading}
         register={register}
         errors={errors}
@@ -90,13 +90,13 @@ const RegisterModal = () => {
       <hr />
       <Button
         outline
-        label="Continue with Google"
+        label="使用 Google 繼續"
         icon={FcGoogle}
         onClick={() => signIn("google")}
       />
       <Button
         outline
-        label="Continue with Github"
+        label="使用 GitHub 繼續"
         icon={AiFillGithub}
         onClick={() => signIn("github")}
       />
@@ -128,7 +128,7 @@ const RegisterModal = () => {
     <Modal
       disabled={isLoading}
       isOpen={registerModal.isOpen}
-      title="Register"
+      title="註冊"
       actionLabel="Continue"
       onClose={registerModal.onClose}
       onSubmit={handleSubmit(onSubmit)}

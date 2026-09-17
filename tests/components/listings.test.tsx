@@ -52,9 +52,9 @@ describe("ListingCard", () => {
     render(<ListingCard data={makeListing()} />);
 
     expect(screen.getByText("¥ 120")).toBeInTheDocument();
-    expect(screen.getByText("month")).toBeInTheDocument();
+    expect(screen.getByText("／月")).toBeInTheDocument();
     expect(screen.getByText("Beach")).toBeInTheDocument();
-    expect(screen.getByText("Americas, Peru")).toBeInTheDocument();
+    expect(screen.getByText("東京都・新宿區, 新宿站")).toBeInTheDocument();
 
     await userEvent.click(screen.getByAltText("Listing"));
 
@@ -76,8 +76,8 @@ describe("ListingCard", () => {
     );
 
     expect(screen.getByText("¥ 480")).toBeInTheDocument();
-    expect(screen.queryByText("month")).not.toBeInTheDocument();
-    expect(screen.getByText(/May 1, 2024 - May 5, 2024/)).toBeInTheDocument();
+    expect(screen.queryByText("／月")).not.toBeInTheDocument();
+    expect(screen.getByText("2024年5月1日－2024年5月5日")).toBeInTheDocument();
   });
 
   it("runs the action with the action id", async () => {
@@ -124,7 +124,7 @@ describe("ListingHead", () => {
     render(
       <ListingHead
         title="Sunny loft"
-        locationValue="PE"
+        locationValue="tokyo-shinjuku"
         imageSrc="https://example.com/loft.png"
         id="listing-1"
         currentUser={makeUser()}
@@ -132,7 +132,7 @@ describe("ListingHead", () => {
     );
 
     expect(screen.getByText("Sunny loft")).toBeInTheDocument();
-    expect(screen.getByText("Americas, Peru")).toBeInTheDocument();
+    expect(screen.getByText("東京都・新宿區, 新宿站")).toBeInTheDocument();
     expect(screen.getByAltText("Image")).toHaveAttribute(
       "src",
       "https://example.com/loft.png",
@@ -147,19 +147,19 @@ describe("ListingInfo", () => {
     guestCount: 4,
     roomCount: 2,
     bathroomCount: 1,
-    locationValue: "PE",
+    locationValue: "tokyo-shinjuku",
   };
 
   it("renders the host, the counts and the map", async () => {
     render(<ListingInfo {...baseProps} category={undefined} />);
 
-    expect(screen.getByText("Hosted by Ada Lovelace")).toBeInTheDocument();
-    expect(screen.getByText("4 guests")).toBeInTheDocument();
-    expect(screen.getByText("2 rooms")).toBeInTheDocument();
-    expect(screen.getByText("1 bathrooms")).toBeInTheDocument();
+    expect(screen.getByText("房東：Ada Lovelace")).toBeInTheDocument();
+    expect(screen.getByText("4 位房客")).toBeInTheDocument();
+    expect(screen.getByText("2 間房")).toBeInTheDocument();
+    expect(screen.getByText("1 間衛浴")).toBeInTheDocument();
     expect(await screen.findByTestId("map")).toHaveAttribute(
       "data-center",
-      "[-10,-76]",
+      "[35.6909,139.7003]",
     );
   });
 
@@ -214,7 +214,7 @@ describe("ListingReservation", () => {
       "0",
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
+    await userEvent.click(screen.getByRole("button", { name: "送出入住申請" }));
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
@@ -241,6 +241,6 @@ describe("ListingReservation", () => {
     await userEvent.click(screen.getByTestId("date-range"));
 
     expect(onChangeDate).toHaveBeenCalledWith({ key: "selection" });
-    expect(screen.getByRole("button", { name: "Reserve" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "送出入住申請" })).toBeDisabled();
   });
 });

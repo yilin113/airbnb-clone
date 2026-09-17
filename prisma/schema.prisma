@@ -46,24 +46,27 @@ model Account {
 }
 
 model Listing {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId        String   @db.ObjectId
-  title         String
-  description   String
-  imageSrc      String
-  createdAt     DateTime @default(now())
-  category      String
-  roomCount     Int
-  bathroomCount Int
-  guestCount    Int
-  locationValue String
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String   @db.ObjectId
+  title          String
+  description    String
+  imageSrc       String
+  createdAt      DateTime @default(now())
+  category       String
+  roomCount      Int
+  bathroomCount  Int
+  guestCount     Int
+  locationValue  String
+  prefectureCode String
+  cityCode       String
+  stationCode    String
   // Monthly amounts in JPY. `price` is kept for compatibility with the
   // original clone, but now represents the monthly base rent.
-  price         Int
-  utilitiesFee  Int      @default(0)
-  managementFee Int      @default(0)
-  cleaningFee   Int      @default(0)
-  deposit       Int      @default(0)
+  price          Int
+  utilitiesFee   Int      @default(0)
+  managementFee  Int      @default(0)
+  cleaningFee    Int      @default(0)
+  deposit        Int      @default(0)
 
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   reservations     Reservation[]

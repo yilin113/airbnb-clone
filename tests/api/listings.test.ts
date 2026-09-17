@@ -29,7 +29,12 @@ const listingBody = {
   roomCount: 2,
   bathroomCount: 1,
   guestCount: 4,
-  location: { value: "PE" },
+  location: {
+    value: "tokyo-shinjuku",
+    prefectureCode: "13",
+    cityCode: "13104",
+    stationCode: "JY17",
+  },
   price: "120",
   utilitiesFee: "20",
   managementFee: "10",
@@ -70,6 +75,34 @@ describe("POST /api/listings", () => {
     expect(prismaMock.listing.create).not.toHaveBeenCalled();
   });
 
+  it("rejects a location outside the supported Japanese stations", async () => {
+    getCurrentUser.mockResolvedValue(makeUser());
+
+    const response = await POST(
+      postRequest({
+        ...listingBody,
+        location: {
+          value: "not-japan",
+          prefectureCode: "XX",
+          cityCode: "XX",
+          stationCode: "XX",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(422);
+    await expect(response.json()).resolves.toMatchObject({
+      error: {
+        issues: [
+          {
+            path: "location",
+            message: "Location must match a supported Japanese station.",
+          },
+        ],
+      },
+    });
+  });
+
   it("creates the listing for the signed-in user", async () => {
     const user = makeUser();
     const listing = makeListing();
@@ -87,7 +120,10 @@ describe("POST /api/listings", () => {
         roomCount: 2,
         bathroomCount: 1,
         guestCount: 4,
-        locationValue: "PE",
+        locationValue: "tokyo-shinjuku",
+        prefectureCode: "13",
+        cityCode: "13104",
+        stationCode: "JY17",
         price: 120,
         utilitiesFee: 20,
         managementFee: 10,

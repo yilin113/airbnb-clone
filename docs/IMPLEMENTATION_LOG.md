@@ -116,3 +116,37 @@
 - Japan-only prefecture, city, and station location model.
 - Email or in-app notifications for booking decisions.
 - Payment collection and deposit settlement.
+
+## 2026-09-17 — Phase 2A: Japan locations and Traditional Chinese UI
+
+### Scope
+
+- Replaced the worldwide country picker with an MVP catalogue of 12 major
+  Japanese stations across Tokyo, Osaka, Kyoto, Fukuoka, Sapporo, Nagoya,
+  Yokohama, and Kobe.
+- Added stable prefecture, city, and station codes to listings while retaining a
+  composite location value for search compatibility.
+- Added server-side catalogue validation so clients cannot submit unsupported
+  countries or mismatched Japanese location codes.
+- Changed the default map view from Peru/worldwide to Japan and increased the
+  selected-station zoom level.
+- Localized the primary search, authentication, listing creation, booking,
+  favorites, trips, properties, and host decision flows to Traditional Chinese.
+- Added Traditional Chinese reservation status labels and date formatting while
+  retaining stable English enum values in the database and API.
+- Updated product metadata and the document language to `zh-Hant`.
+
+### Verification
+
+- `pnpm test`: 29 files, 254 tests passed.
+- `pnpm test:coverage`: 100% statements, branches, functions, and lines.
+- `pnpm lint`: zero errors; the pre-existing React Compiler warning in
+  `RentModal.tsx` remains.
+- `pnpm typecheck`: passed.
+
+### Catalogue limitation
+
+- The current station set is intentionally curated for an offline, testable MVP
+  and is not a complete Japan railway database.
+- A versioned Japanese railway dataset or licensed map provider should replace
+  or extend it before broad public launch.

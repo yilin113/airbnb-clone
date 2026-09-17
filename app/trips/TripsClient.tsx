@@ -30,11 +30,11 @@ const TripsClient: React.FC<TripsClientProps> = ({
       axios
         .delete(`/api/reservations/${id}`)
         .then(() => {
-          toast.success("Reservation cancelled successfully");
+          toast.success("入住申請已取消");
           router.refresh();
         })
         .catch((error) => {
-          toast.error(error?.response?.data?.message || "Something went wrong");
+          toast.error(error?.response?.data?.message || "發生錯誤，請稍後再試");
         })
         .finally(() => {
           setDeletingId("");
@@ -45,7 +45,7 @@ const TripsClient: React.FC<TripsClientProps> = ({
 
   return (
     <Container>
-      <Heading title="Trips" subtitle="Your upcoming trips" />
+      <Heading title="我的旅居" subtitle="查看即將入住的日本房源" />
       <div
         className="
           mt-10
@@ -67,7 +67,7 @@ const TripsClient: React.FC<TripsClientProps> = ({
             actionId={reservation.id}
             onAction={onCancel}
             disabled={deletingId === reservation.id}
-            actionLabel="Cancel Reservation"
+            actionLabel="取消入住申請"
             currentUser={currentUser}
           />
         ))}

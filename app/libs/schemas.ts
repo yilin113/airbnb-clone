@@ -1,4 +1,24 @@
 import { z } from "zod";
+import { japanLocations } from "@/app/data/japanLocations";
+
+const japanLocationSchema = z
+  .object({
+    value: z.string().trim().min(1).max(20),
+    prefectureCode: z.string().trim().min(1).max(10),
+    cityCode: z.string().trim().min(1).max(10),
+    stationCode: z.string().trim().min(1).max(20),
+  })
+  .refine(
+    (value) =>
+      japanLocations.some(
+        (location) =>
+          location.value === value.value &&
+          location.prefectureCode === value.prefectureCode &&
+          location.cityCode === value.cityCode &&
+          location.stationCode === value.stationCode,
+      ),
+    { message: "Location must match a supported Japanese station." },
+  );
 
 export const registerSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(254),
@@ -14,9 +34,7 @@ export const listingSchema = z.object({
   roomCount: z.coerce.number().int().min(1).max(50),
   bathroomCount: z.coerce.number().int().min(1).max(50),
   guestCount: z.coerce.number().int().min(1).max(100),
-  location: z.object({
-    value: z.string().trim().min(1).max(20),
-  }),
+  location: japanLocationSchema,
   price: z.coerce.number().int().min(1).max(100_000_000),
   utilitiesFee: z.coerce.number().int().min(0).max(100_000_000),
   managementFee: z.coerce.number().int().min(0).max(100_000_000),

@@ -15,8 +15,8 @@ const PropertiesPage = async () => {
     return (
       <ClientOnly>
         <EmptyState
-          title="Unauthenticated User"
-          subtitle="You can log in at the top right of the page."
+          title="請先登入"
+          subtitle="登入後即可管理房源。"
         />
       </ClientOnly>
     );
@@ -26,8 +26,8 @@ const PropertiesPage = async () => {
     return (
       <ClientOnly>
         <EmptyState
-          title="No Properties found"
-          subtitle="Looks like you don't have any properties yet."
+          title="尚未刊登房源"
+          subtitle="建立第一間日本中期旅居房源。"
         />
       </ClientOnly>
     );

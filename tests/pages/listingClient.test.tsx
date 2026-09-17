@@ -107,7 +107,7 @@ describe("ListingClient", () => {
 
     expect(screen.getAllByText("¥ 120")).toHaveLength(2);
 
-    await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
+    await userEvent.click(screen.getByRole("button", { name: "送出入住申請" }));
     expect(mockedAxios.post).not.toHaveBeenCalled();
   });
 
@@ -122,7 +122,7 @@ describe("ListingClient", () => {
 
     expect(screen.getAllByText("¥ 120")).toHaveLength(2);
 
-    await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
+    await userEvent.click(screen.getByRole("button", { name: "送出入住申請" }));
     expect(mockedAxios.post).not.toHaveBeenCalled();
   });
 
@@ -130,7 +130,7 @@ describe("ListingClient", () => {
     mockedAxios.post.mockResolvedValue({ data: {} });
     render(<ListingClient listing={listing} currentUser={makeUser()} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
+    await userEvent.click(screen.getByRole("button", { name: "送出入住申請" }));
 
     await waitFor(() => {
       expect(mockedAxios.post).toHaveBeenCalledWith(
@@ -138,14 +138,14 @@ describe("ListingClient", () => {
         expect.not.objectContaining({ totalPrice: expect.anything() }),
       );
     });
-    expect(toast.success).toHaveBeenCalledWith("Booking request sent");
+    expect(toast.success).toHaveBeenCalledWith("入住申請已送出");
     expect(routerMock.push).toHaveBeenCalledWith("/trips");
   });
 
   it("asks an anonymous visitor to log in first", async () => {
     render(<ListingClient listing={listing} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
+    await userEvent.click(screen.getByRole("button", { name: "送出入住申請" }));
 
     expect(useLoginModal.getState().isOpen).toBe(true);
     expect(mockedAxios.post).not.toHaveBeenCalled();

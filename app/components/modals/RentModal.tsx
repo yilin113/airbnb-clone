@@ -91,14 +91,14 @@ const RentModal = () => {
     axios
       .post("/api/listings", data)
       .then(() => {
-        toast.success("Listing created successfully");
+        toast.success("房源已建立");
         router.refresh();
         reset();
         setStep(STEPS.CATEGORY);
         rentModal.onClose();
       })
       .catch(() => {
-        toast.error("Something went wrong");
+        toast.error("發生錯誤，請稍後再試");
       })
       .finally(() => {
         setIsLoading(false);
@@ -107,10 +107,10 @@ const RentModal = () => {
 
   const actionLabel = useMemo(() => {
     if (step === STEPS.PRICE) {
-      return "Publish";
+      return "刊登房源";
     }
 
-    return "Next";
+    return "下一步";
   }, [step]);
 
   const secondaryActionLabel = useMemo(() => {
@@ -118,14 +118,14 @@ const RentModal = () => {
       return undefined;
     }
 
-    return "Back";
+    return "返回";
   }, [step]);
 
   let bodyContent = (
     <div className="flex flex-col gap-4">
       <Heading
-        title="Which category best describes your place?"
-        subtitle="You can change this later"
+        title="這間房源屬於哪一類？"
+        subtitle="之後仍可修改"
       />
       <div
         className="
@@ -156,8 +156,8 @@ const RentModal = () => {
     bodyContent = (
       <div className="flex flex-col gap-8">
         <Heading
-          title="Where's your place located?"
-          subtitle="Exact address will be shared with guests after booking is confirmed"
+          title="房源位於日本哪裡？"
+          subtitle="請選擇最接近的城市與車站"
         />
         <CountrySelect
           onChange={(value) => setCustomValue("location", value)}
@@ -172,26 +172,26 @@ const RentModal = () => {
     bodyContent = (
       <div className="flex flex-col gap-8">
         <Heading
-          title="Share some details about your place"
-          subtitle="You can always change this later"
+          title="提供房源基本資料"
+          subtitle="之後仍可修改"
         />
         <Counter
-          title="Guests"
-          subtitle="How many guests can your place accommodate?"
+          title="房客"
+          subtitle="最多可入住幾人？"
           value={guestCount}
           onChange={(value) => setCustomValue("guestCount", value)}
         />
         <hr />
         <Counter
-          title="Rooms"
-          subtitle="How many rooms can guests use?"
+          title="房間"
+          subtitle="房客可使用幾間房？"
           value={roomCount}
           onChange={(value) => setCustomValue("roomCount", value)}
         />
         <hr />
         <Counter
-          title="Bathrooms"
-          subtitle="How many bathrooms can guests use?"
+          title="衛浴"
+          subtitle="房客可使用幾間衛浴？"
           value={bathroomCount}
           onChange={(value) => setCustomValue("bathroomCount", value)}
         />
@@ -203,8 +203,8 @@ const RentModal = () => {
     bodyContent = (
       <div className="flex flex-col gap-8">
         <Heading
-          title="Upload some photos of your place"
-          subtitle="You can always add more later"
+          title="上傳房源照片"
+          subtitle="之後仍可新增照片"
         />
         <ImageUpload
           value={imageSrc}
@@ -218,12 +218,12 @@ const RentModal = () => {
     bodyContent = (
       <div className="flex flex-col gap-8">
         <Heading
-          title="Describe your place to guests"
-          subtitle="You can always edit this later"
+          title="向房客介紹你的房源"
+          subtitle="之後仍可修改"
         />
         <Input
           id="title"
-          label="Title"
+          label="房源名稱"
           disabled={isLoading}
           register={register}
           errors={errors}
@@ -232,7 +232,7 @@ const RentModal = () => {
         <hr />
         <Input
           id="description"
-          label="Description"
+          label="房源介紹"
           disabled={isLoading}
           register={register}
           errors={errors}
@@ -246,12 +246,12 @@ const RentModal = () => {
     bodyContent = (
       <div className="flex flex-col gap-8">
         <Heading
-          title="Now let's set up your monthly rent"
-          subtitle="You can always edit this later"
+          title="設定月租與其他費用"
+          subtitle="所有金額皆為日圓，之後仍可修改"
         />
         <Input
           id="price"
-          label="Monthly rent (JPY)"
+          label="每月租金（日圓）"
           formatPrice
           type="number"
           disabled={isLoading}
@@ -261,7 +261,7 @@ const RentModal = () => {
         />
         <Input
           id="utilitiesFee"
-          label="Monthly utilities (JPY)"
+          label="每月水電費（日圓）"
           formatPrice
           type="number"
           disabled={isLoading}
@@ -271,7 +271,7 @@ const RentModal = () => {
         />
         <Input
           id="managementFee"
-          label="Monthly management fee (JPY)"
+          label="每月管理費（日圓）"
           formatPrice
           type="number"
           disabled={isLoading}
@@ -281,7 +281,7 @@ const RentModal = () => {
         />
         <Input
           id="cleaningFee"
-          label="One-time cleaning fee (JPY)"
+          label="一次性清潔費（日圓）"
           formatPrice
           type="number"
           disabled={isLoading}
@@ -291,7 +291,7 @@ const RentModal = () => {
         />
         <Input
           id="deposit"
-          label="Refundable deposit (JPY)"
+          label="可退還押金（日圓）"
           formatPrice
           type="number"
           disabled={isLoading}
@@ -311,7 +311,7 @@ const RentModal = () => {
       actionLabel={actionLabel}
       secondaryActionLabel={secondaryActionLabel}
       secondaryAction={step === STEPS.CATEGORY ? undefined : onBack}
-      title="Airbnb your home"
+      title="刊登日本房源"
       body={bodyContent}
     />
   );

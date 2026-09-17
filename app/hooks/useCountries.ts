@@ -1,21 +1,10 @@
-import countries from "world-countries";
-
-const formattedCountries = countries.map((country) => ({
-  label: country.name.common,
-  value: country.cca2,
-  flag: country.flag,
-  latlng: country.latlng,
-  region: country.region,
-}));
+import { japanLocations } from "@/app/data/japanLocations";
 
 const useCountries = () => {
-  const getAll = () => formattedCountries;
+  const getAll = () => japanLocations;
 
   const getByValue = (value: string) => {
-    const country = formattedCountries.find(
-      (country) => country.value === value
-    );
-    return country;
+    return japanLocations.find((location) => location.value === value);
   };
 
   return {

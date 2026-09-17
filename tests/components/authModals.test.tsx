@@ -59,7 +59,7 @@ describe("LoginModal", () => {
         redirect: false,
       });
     });
-    expect(toast.success).toHaveBeenCalledWith("Logged in successfully");
+    expect(toast.success).toHaveBeenCalledWith("登入成功");
     expect(routerMock.refresh).toHaveBeenCalled();
     expect(useLoginModal.getState().isOpen).toBe(false);
   });
@@ -82,12 +82,12 @@ describe("LoginModal", () => {
     render(<LoginModal />);
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Continue with Google" }),
+      screen.getByRole("button", { name: "使用 Google 繼續" }),
     );
     expect(signIn).toHaveBeenCalledWith("google");
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Continue with Github" }),
+      screen.getByRole("button", { name: "使用 GitHub 繼續" }),
     );
     expect(signIn).toHaveBeenCalledWith("github");
   });
@@ -123,7 +123,7 @@ describe("RegisterModal", () => {
         password: "secret",
       });
     });
-    expect(toast.success).toHaveBeenCalledWith("Account created successfully");
+    expect(toast.success).toHaveBeenCalledWith("帳號建立成功");
     expect(useRegisterModal.getState().isOpen).toBe(false);
     expect(useLoginModal.getState().isOpen).toBe(true);
   });
@@ -139,7 +139,7 @@ describe("RegisterModal", () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        "Something went wrong, please try again later",
+        "發生錯誤，請稍後再試",
       );
     });
     expect(useRegisterModal.getState().isOpen).toBe(true);
@@ -149,12 +149,12 @@ describe("RegisterModal", () => {
     render(<RegisterModal />);
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Continue with Google" }),
+      screen.getByRole("button", { name: "使用 Google 繼續" }),
     );
     expect(signIn).toHaveBeenCalledWith("google");
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Continue with Github" }),
+      screen.getByRole("button", { name: "使用 GitHub 繼續" }),
     );
     expect(signIn).toHaveBeenCalledWith("github");
   });

@@ -108,7 +108,7 @@ describe("EmptyState", () => {
   it("renders the default copy without a reset button", () => {
     render(<EmptyState />);
 
-    expect(screen.getByText("No exact matches")).toBeInTheDocument();
+    expect(screen.getByText("找不到符合條件的房源")).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
@@ -116,7 +116,7 @@ describe("EmptyState", () => {
     render(<EmptyState title="Nothing" subtitle="Here" showReset />);
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Remove all filters" })
+      screen.getByRole("button", { name: "清除所有篩選" })
     );
 
     expect(routerMock.push).toHaveBeenCalledWith("/");

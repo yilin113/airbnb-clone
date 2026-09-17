@@ -12,8 +12,8 @@ const ListingsPage = async () => {
     return (
       <ClientOnly>
         <EmptyState
-          title="No Favorites found"
-          subtitle="Try searching for a listing or adding a new one."
+          title="尚未收藏房源"
+          subtitle="瀏覽房源並加入收藏。"
         />
       </ClientOnly>
     );

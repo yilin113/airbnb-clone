@@ -2,26 +2,33 @@ import { describe, expect, it } from "vitest";
 
 import useCountries from "@/app/hooks/useCountries";
 
-describe("useCountries", () => {
+describe("Japanese locations", () => {
   const { getAll, getByValue } = useCountries();
 
-  it("formats every country", () => {
+  it("provides the curated station catalogue", () => {
     const all = getAll();
 
-    expect(all.length).toBeGreaterThan(200);
+    expect(all.length).toBeGreaterThanOrEqual(12);
     expect(all[0]).toEqual(
       expect.objectContaining({
         label: expect.any(String),
         value: expect.any(String),
         flag: expect.any(String),
         region: expect.any(String),
+        prefectureCode: expect.any(String),
+        cityCode: expect.any(String),
+        stationCode: expect.any(String),
       })
     );
   });
 
-  it("finds a country by its cca2 code", () => {
-    expect(getByValue("PE")).toEqual(
-      expect.objectContaining({ label: "Peru", value: "PE" })
+  it("finds a station by its stable location value", () => {
+    expect(getByValue("tokyo-shinjuku")).toEqual(
+      expect.objectContaining({
+        label: "新宿站",
+        value: "tokyo-shinjuku",
+        region: "東京都・新宿區",
+      }),
     );
   });
 

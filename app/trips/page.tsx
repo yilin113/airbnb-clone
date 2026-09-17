@@ -15,8 +15,8 @@ const TripsPage = async () => {
     return (
       <ClientOnly>
         <EmptyState
-          title="Unauthenticated User"
-          subtitle="You can log in at the top right of the page."
+          title="請先登入"
+          subtitle="登入後即可查看旅居申請。"
         />
       </ClientOnly>
     );
@@ -26,8 +26,8 @@ const TripsPage = async () => {
     return (
       <ClientOnly>
         <EmptyState
-          title="No Trips found"
-          subtitle="You have no trips scheduled."
+          title="尚無旅居申請"
+          subtitle="找到合適房源後即可提出入住申請。"
         />
       </ClientOnly>
     );

@@ -47,7 +47,7 @@ describe("RootLayout", () => {
       children: <span>page body</span>,
     })) as ReactElement<{ lang: string; children: ReactElement }>;
 
-    expect(tree.props.lang).toBe("en");
+    expect(tree.props.lang).toBe("zh-Hant");
 
     const body = tree.props.children as ReactElement<{ className: string }>;
     expect(body.props.className).toBe("nunito-font");
@@ -58,8 +58,8 @@ describe("RootLayout", () => {
     const { metadata } = await import("@/app/layout");
 
     expect(metadata).toEqual({
-      title: "Airbnb clone",
-      description: "Airbnb app for vacation rentals",
+      title: "日本中期旅居",
+      description: "提供台灣旅客赴日居住 30 天以上的中期租賃平台",
     });
   });
 });
@@ -73,9 +73,9 @@ describe("Home", () => {
       await Home({ searchParams: Promise.resolve({ category: "Beach" }) }),
     );
 
-    expect(screen.getByText("No exact matches")).toBeInTheDocument();
+    expect(screen.getByText("找不到符合條件的房源")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Remove all filters" }),
+      screen.getByRole("button", { name: "清除所有篩選" }),
     ).toBeInTheDocument();
     expect(actions.getListings).toHaveBeenCalledWith({ category: "Beach" });
   });
@@ -126,7 +126,7 @@ describe("FavoritesPage", () => {
 
     render(await FavoritesPage());
 
-    expect(screen.getByText("No Favorites found")).toBeInTheDocument();
+    expect(screen.getByText("尚未收藏房源")).toBeInTheDocument();
   });
 
   it("lists the favorites", async () => {
@@ -135,7 +135,7 @@ describe("FavoritesPage", () => {
 
     render(await FavoritesPage());
 
-    expect(screen.getByText("Favorites")).toBeInTheDocument();
+    expect(screen.getByText("收藏房源")).toBeInTheDocument();
     expect(screen.getByAltText("Listing")).toBeInTheDocument();
   });
 });
@@ -148,7 +148,7 @@ describe("PropertiesPage", () => {
 
     render(await PropertiesPage());
 
-    expect(screen.getByText("Unauthenticated User")).toBeInTheDocument();
+    expect(screen.getByText("請先登入")).toBeInTheDocument();
   });
 
   it("nudges a host with no properties", async () => {
@@ -157,7 +157,7 @@ describe("PropertiesPage", () => {
 
     render(await PropertiesPage());
 
-    expect(screen.getByText("No Properties found")).toBeInTheDocument();
+    expect(screen.getByText("尚未刊登房源")).toBeInTheDocument();
   });
 
   it("lists the properties", async () => {
@@ -166,7 +166,7 @@ describe("PropertiesPage", () => {
 
     render(await PropertiesPage());
 
-    expect(screen.getByText("Properties")).toBeInTheDocument();
+    expect(screen.getByText("我的房源")).toBeInTheDocument();
     expect(actions.getListings).toHaveBeenCalledWith({ userId: "user-1" });
   });
 });
@@ -179,7 +179,7 @@ describe("ReservationsPage", () => {
 
     render(await ReservationsPage());
 
-    expect(screen.getByText("You must be signed in")).toBeInTheDocument();
+    expect(screen.getByText("請先登入")).toBeInTheDocument();
   });
 
   it("nudges a host with no reservations", async () => {
@@ -188,7 +188,7 @@ describe("ReservationsPage", () => {
 
     render(await ReservationsPage());
 
-    expect(screen.getByText("No reservations found")).toBeInTheDocument();
+    expect(screen.getByText("目前沒有房客申請")).toBeInTheDocument();
   });
 
   it("lists the reservations", async () => {
@@ -199,7 +199,7 @@ describe("ReservationsPage", () => {
 
     render(await ReservationsPage());
 
-    expect(screen.getByText("Reservations")).toBeInTheDocument();
+    expect(screen.getByText("房客申請")).toBeInTheDocument();
     expect(actions.getReservations).toHaveBeenCalledWith({
       authorId: "user-1",
     });
@@ -214,7 +214,7 @@ describe("TripsPage", () => {
 
     render(await TripsPage());
 
-    expect(screen.getByText("Unauthenticated User")).toBeInTheDocument();
+    expect(screen.getByText("請先登入")).toBeInTheDocument();
   });
 
   it("nudges a guest with no trips", async () => {
@@ -223,7 +223,7 @@ describe("TripsPage", () => {
 
     render(await TripsPage());
 
-    expect(screen.getByText("No Trips found")).toBeInTheDocument();
+    expect(screen.getByText("尚無旅居申請")).toBeInTheDocument();
   });
 
   it("lists the trips", async () => {
@@ -234,7 +234,7 @@ describe("TripsPage", () => {
 
     render(await TripsPage());
 
-    expect(screen.getByText("Trips")).toBeInTheDocument();
+    expect(screen.getByText("我的旅居")).toBeInTheDocument();
     expect(actions.getReservations).toHaveBeenCalledWith({ userId: "user-1" });
   });
 });
@@ -248,7 +248,7 @@ describe("ListingPage", () => {
 
     render(await ListingPage({ params: Promise.resolve({ listingId: "x" }) }));
 
-    expect(screen.getByText("No exact matches")).toBeInTheDocument();
+    expect(screen.getByText("找不到符合條件的房源")).toBeInTheDocument();
   });
 
   it("renders the listing", async () => {

@@ -12,8 +12,8 @@ import SearchModal from "./components/modals/SearchModal";
 const font = Nunito({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Airbnb clone",
-  description: "Airbnb app for vacation rentals",
+  title: "日本中期旅居",
+  description: "提供台灣旅客赴日居住 30 天以上的中期租賃平台",
 };
 
 export default async function RootLayout({
@@ -24,7 +24,7 @@ export default async function RootLayout({
   const currentUser = await getCurrentUser();
 
   return (
-    <html lang="en">
+    <html lang="zh-Hant">
       <body className={font.className}>
         <ClientOnly>
           <Toaster />

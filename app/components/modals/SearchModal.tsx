@@ -101,10 +101,10 @@ const SearchModal = () => {
 
   const actionLabel = useMemo(() => {
     if (step === STEPS.INFO) {
-      return "Search";
+      return "搜尋";
     }
 
-    return "Next";
+    return "下一步";
   }, [step]);
 
   const secondaryActionLabel = useMemo(() => {
@@ -112,14 +112,14 @@ const SearchModal = () => {
       return undefined;
     }
 
-    return "Back";
+    return "返回";
   }, [step]);
 
   let bodyContent = (
     <div className="flex flex-col gap-8">
       <Heading
-        title="Where do you wanna go?"
-        subtitle="Find the perfect location!"
+        title="想住在日本哪裡？"
+        subtitle="選擇都道府縣、城市與車站"
       />
       <CountrySelect
         value={location}
@@ -134,8 +134,8 @@ const SearchModal = () => {
     bodyContent = (
       <div className="flex flex-col gap-8">
         <Heading
-          title="When do you plan to go?"
-          subtitle="Make sure everyone is free!"
+          title="預計何時入住？"
+          subtitle="每次入住至少 30 晚"
         />
         <Calendar
           onChange={(value) => setDateRange(value.selection)}
@@ -148,19 +148,19 @@ const SearchModal = () => {
   if (step === STEPS.INFO) {
     bodyContent = (
       <div className="flex flex-col gap-8">
-        <Heading title="More information" subtitle="Find your perfect place!" />
+        <Heading title="住宿需求" subtitle="協助你找到合適的房源" />
         <Counter
           onChange={(value) => setGuestCount(value)}
           value={guestCount}
-          title="Guests"
-          subtitle="How many guests are coming?"
+          title="房客"
+          subtitle="共有幾位房客？"
         />
         <hr />
         <Counter
           onChange={(value) => setRoomCount(value)}
           value={roomCount}
-          title="Rooms"
-          subtitle="How many rooms do you need?"
+          title="房間"
+          subtitle="需要幾間房？"
         />
         <hr />
         <Counter
@@ -168,8 +168,8 @@ const SearchModal = () => {
             setBathroomCount(value);
           }}
           value={bathroomCount}
-          title="Bathrooms"
-          subtitle="How many bahtrooms do you need?"
+          title="衛浴"
+          subtitle="需要幾間衛浴？"
         />
       </div>
     );
@@ -178,7 +178,7 @@ const SearchModal = () => {
   return (
     <Modal
       isOpen={searchModal.isOpen}
-      title="Filters"
+      title="搜尋條件"
       actionLabel={actionLabel}
       onSubmit={onSubmit}
       secondaryActionLabel={secondaryActionLabel}

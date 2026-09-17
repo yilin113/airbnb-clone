@@ -42,7 +42,7 @@ const LoginModal = () => {
       setIsLoading(false);
 
       if (response?.ok) {
-        toast.success("Logged in successfully");
+        toast.success("登入成功");
         router.refresh();
         loginModal.onClose();
       }
@@ -60,10 +60,10 @@ const LoginModal = () => {
 
   const bodyContent = (
     <div className="flex flex-col gap-4">
-      <Heading title="Welcome back" subtitle="Login to your account" />
+      <Heading title="歡迎回來" subtitle="登入你的旅居帳號" />
       <Input
         id="email"
-        label="Email address"
+        label="電子郵件"
         disabled={isLoading}
         register={register}
         errors={errors}
@@ -71,7 +71,7 @@ const LoginModal = () => {
       />
       <Input
         id="password"
-        label="Password"
+        label="密碼"
         type="password"
         disabled={isLoading}
         register={register}
@@ -86,13 +86,13 @@ const LoginModal = () => {
       <hr />
       <Button
         outline
-        label="Continue with Google"
+        label="使用 Google 繼續"
         icon={FcGoogle}
         onClick={() => signIn("google")}
       />
       <Button
         outline
-        label="Continue with Github"
+        label="使用 GitHub 繼續"
         icon={AiFillGithub}
         onClick={() => signIn("github")}
       />
@@ -105,7 +105,7 @@ const LoginModal = () => {
         "
       >
         <div className="flex flex-row items-center justify-center gap-2">
-          <div>First time using Airbnb?</div>
+          <div>第一次使用日本中期旅居？</div>
           <div
             onClick={toggle}
             className="
@@ -124,7 +124,7 @@ const LoginModal = () => {
     <Modal
       disabled={isLoading}
       isOpen={loginModal.isOpen}
-      title="Login"
+      title="登入"
       actionLabel="Continue"
       onClose={loginModal.onClose}
       onSubmit={handleSubmit(onSubmit)}

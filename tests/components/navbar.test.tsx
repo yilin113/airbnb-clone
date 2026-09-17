@@ -112,27 +112,27 @@ describe("Search", () => {
   it("shows the default labels", async () => {
     render(<Search />);
 
-    expect(screen.getByText("Anywhere")).toBeInTheDocument();
-    expect(screen.getByText("Any Week")).toBeInTheDocument();
-    expect(screen.getByText("Add Guests")).toBeInTheDocument();
+    expect(screen.getByText("日本地點")).toBeInTheDocument();
+    expect(screen.getByText("入住日期")).toBeInTheDocument();
+    expect(screen.getByText("新增房客")).toBeInTheDocument();
 
-    await userEvent.click(screen.getByText("Anywhere"));
+    await userEvent.click(screen.getByText("日本地點"));
 
     expect(useSearchModal.getState().isOpen).toBe(true);
   });
 
   it("summarises the active filters", () => {
     setSearchParams({
-      locationValue: "PE",
+      locationValue: "tokyo-shinjuku",
       startDate: "2024-05-01T00:00:00.000Z",
       endDate: "2024-05-05T00:00:00.000Z",
       guestCount: "3",
     });
     render(<Search />);
 
-    expect(screen.getByText("Peru")).toBeInTheDocument();
-    expect(screen.getByText("4 Days")).toBeInTheDocument();
-    expect(screen.getByText("3 Guests")).toBeInTheDocument();
+    expect(screen.getByText("新宿站")).toBeInTheDocument();
+    expect(screen.getByText("4 晚")).toBeInTheDocument();
+    expect(screen.getByText("3 位房客")).toBeInTheDocument();
   });
 
   it("counts a same-day stay as one day", () => {
@@ -142,14 +142,14 @@ describe("Search", () => {
     });
     render(<Search />);
 
-    expect(screen.getByText("1 Days")).toBeInTheDocument();
+    expect(screen.getByText("1 晚")).toBeInTheDocument();
   });
 
   it("copes with no search params at all", () => {
     navigationState.searchParams = null;
     render(<Search />);
 
-    expect(screen.getByText("Anywhere")).toBeInTheDocument();
+    expect(screen.getByText("日本地點")).toBeInTheDocument();
   });
 });
 
@@ -157,25 +157,25 @@ describe("UserMenu", () => {
   it("offers login and sign up when signed out", async () => {
     render(<UserMenu />);
 
-    await userEvent.click(screen.getByText("Airbnb your home"));
+    await userEvent.click(screen.getByText("刊登房源"));
     expect(useLoginModal.getState().isOpen).toBe(true);
     expect(useRentModal.getState().isOpen).toBe(false);
 
     const toggle = screen.getByRole("img", { hidden: true });
 
     await userEvent.click(toggle);
-    await userEvent.click(screen.getByText("Login"));
+    await userEvent.click(screen.getByText("登入"));
     expect(useLoginModal.getState().isOpen).toBe(true);
 
     await userEvent.click(toggle);
-    await userEvent.click(screen.getByText("Sign up"));
+    await userEvent.click(screen.getByText("註冊"));
     expect(useRegisterModal.getState().isOpen).toBe(true);
   });
 
   it("opens the rent modal for a signed-in user", async () => {
     render(<UserMenu currentUser={makeUser()} />);
 
-    await userEvent.click(screen.getByText("Airbnb your home"));
+    await userEvent.click(screen.getByText("刊登房源"));
 
     expect(useRentModal.getState().isOpen).toBe(true);
   });
@@ -187,25 +187,26 @@ describe("UserMenu", () => {
     // Picking an entry closes the menu, so each one needs it reopened first.
     const pick = async (label: string) => {
       await userEvent.click(toggle);
-      await userEvent.click(screen.getByText(label));
+      const matches = screen.getAllByText(label);
+      await userEvent.click(matches[matches.length - 1]);
     };
 
-    await pick("My trips");
+    await pick("我的旅居");
     expect(routerMock.push).toHaveBeenCalledWith("/trips");
 
-    await pick("My favorites");
+    await pick("收藏房源");
     expect(routerMock.push).toHaveBeenCalledWith("/favorites");
 
-    await pick("My reservations");
+    await pick("房客申請");
     expect(routerMock.push).toHaveBeenCalledWith("/reservations");
 
-    await pick("My properties");
+    await pick("我的房源");
     expect(routerMock.push).toHaveBeenCalledWith("/properties");
 
-    await pick("Airbnb my home");
+    await pick("刊登房源");
     expect(useRentModal.getState().isOpen).toBe(true);
 
-    await pick("Logout");
+    await pick("登出");
     expect(signOut).toHaveBeenCalledTimes(1);
   });
 
@@ -213,9 +214,9 @@ describe("UserMenu", () => {
     render(<UserMenu currentUser={makeUser()} />);
 
     await userEvent.click(screen.getByRole("img", { hidden: true }));
-    await userEvent.click(screen.getByText("My trips"));
+    await userEvent.click(screen.getByText("我的旅居"));
 
-    expect(screen.queryByText("My trips")).not.toBeInTheDocument();
+    expect(screen.queryByText("我的旅居")).not.toBeInTheDocument();
   });
 
   it("closes the menu again", async () => {
@@ -223,21 +224,21 @@ describe("UserMenu", () => {
 
     const toggle = screen.getByRole("img", { hidden: true });
     await userEvent.click(toggle);
-    expect(screen.getByText("My trips")).toBeInTheDocument();
+    expect(screen.getByText("我的旅居")).toBeInTheDocument();
 
     await userEvent.click(toggle);
-    expect(screen.queryByText("My trips")).not.toBeInTheDocument();
+    expect(screen.queryByText("我的旅居")).not.toBeInTheDocument();
   });
 
   it("closes the menu on Escape", async () => {
     render(<UserMenu currentUser={makeUser()} />);
 
     await userEvent.click(screen.getByRole("img", { hidden: true }));
-    expect(screen.getByText("My trips")).toBeInTheDocument();
+    expect(screen.getByText("我的旅居")).toBeInTheDocument();
 
     fireEvent.keyDown(document, { key: "Escape" });
 
-    expect(screen.queryByText("My trips")).not.toBeInTheDocument();
+    expect(screen.queryByText("我的旅居")).not.toBeInTheDocument();
   });
 
   it("leaves the menu open on every other key", async () => {
@@ -247,18 +248,18 @@ describe("UserMenu", () => {
 
     fireEvent.keyDown(document, { key: "Enter" });
 
-    expect(screen.getByText("My trips")).toBeInTheDocument();
+    expect(screen.getByText("我的旅居")).toBeInTheDocument();
   });
 
   it("closes the menu when the press lands outside it", async () => {
     render(<UserMenu currentUser={makeUser()} />);
 
     await userEvent.click(screen.getByRole("img", { hidden: true }));
-    expect(screen.getByText("My trips")).toBeInTheDocument();
+    expect(screen.getByText("我的旅居")).toBeInTheDocument();
 
     fireEvent.mouseDown(document.body);
 
-    expect(screen.queryByText("My trips")).not.toBeInTheDocument();
+    expect(screen.queryByText("我的旅居")).not.toBeInTheDocument();
   });
 });
 
@@ -267,7 +268,7 @@ describe("Navbar", () => {
     render(<Navbar currentUser={makeUser()} />);
 
     expect(screen.getByAltText("logo")).toBeInTheDocument();
-    expect(screen.getByText("Anywhere")).toBeInTheDocument();
-    expect(screen.getByText("Airbnb your home")).toBeInTheDocument();
+    expect(screen.getByText("日本地點")).toBeInTheDocument();
+    expect(screen.getByText("刊登房源")).toBeInTheDocument();
   });
 });

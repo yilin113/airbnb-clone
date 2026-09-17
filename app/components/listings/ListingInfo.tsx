@@ -53,7 +53,7 @@ const ListingInfo: React.FC<IListingInfoProps> = ({
             gap-2
           "
         >
-          <div>Hosted by {user?.name}</div>
+          <div>房東：{user?.name}</div>
           <Avatar src={user?.image} />
         </div>
         <div
@@ -66,9 +66,9 @@ const ListingInfo: React.FC<IListingInfoProps> = ({
             text-neutral-500
           "
         >
-          <div>{guestCount} guests</div>
-          <div>{roomCount} rooms</div>
-          <div>{bathroomCount} bathrooms</div>
+          <div>{guestCount} 位房客</div>
+          <div>{roomCount} 間房</div>
+          <div>{bathroomCount} 間衛浴</div>
         </div>
       </div>
       <hr />

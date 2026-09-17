@@ -28,11 +28,11 @@ const PropertiesClient: React.FC<PropertiesClientProps> = ({
       axios
         .delete(`/api/listings/${id}`)
         .then(() => {
-          toast.success("Listing deleted successfully");
+          toast.success("房源已刪除");
           router.refresh();
         })
         .catch((error) => {
-          toast.error(error?.response?.data?.message || "Something went wrong");
+          toast.error(error?.response?.data?.message || "發生錯誤，請稍後再試");
         })
         .finally(() => {
           setDeletingId("");
@@ -43,7 +43,7 @@ const PropertiesClient: React.FC<PropertiesClientProps> = ({
 
   return (
     <Container>
-      <Heading title="Properties" subtitle="List of your properties" />
+      <Heading title="我的房源" subtitle="管理已刊登的日本房源" />
       <div
         className="
           mt-10
@@ -64,7 +64,7 @@ const PropertiesClient: React.FC<PropertiesClientProps> = ({
             actionId={listing.id}
             onAction={onCancel}
             disabled={deletingId === listing.id}
-            actionLabel="Delete property"
+            actionLabel="刪除房源"
             currentUser={currentUser}
           />
         ))}
