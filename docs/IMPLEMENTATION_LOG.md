@@ -150,3 +150,29 @@
   and is not a complete Japan railway database.
 - A versioned Japanese railway dataset or licensed map provider should replace
   or extend it before broad public launch.
+
+## 2026-09-17 — Phase 2B: MongoDB Atlas MVP provisioning
+
+### Scope
+
+- Provisioned the `JapanMidtermMVP` free Atlas cluster in the existing project.
+- Created a dedicated application database user with read/write access and
+  restricted it to the `JapanMidtermMVP` cluster.
+- Kept credentials outside the repository and Git history.
+- Synchronized the Prisma schema to the `japan_midterm` database.
+
+### Verification
+
+- Created the `User`, `Account`, `Listing`, `Reservation`, and
+  `AvailabilityDay` collections.
+- Created the unique user-email and OAuth-provider indexes.
+- Created the reservation lookup index and the compound unique
+  `AvailabilityDay(listingId, date)` index used to prevent overlapping booking
+  locks.
+- Prisma Client generation completed successfully after schema synchronization.
+
+### Local environment note
+
+- Avast HTTPS scanning intercepted MongoDB TLS traffic during provisioning.
+  Synchronization was completed only after validating the direct Atlas
+  certificate chain. HTTPS scanning must be re-enabled after provisioning.
