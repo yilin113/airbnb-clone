@@ -17,5 +17,9 @@ export default async function getFavoriteListings() {
     },
   });
 
-  return favorites;
+  return favorites.map((listing) => ({
+    ...listing,
+    postalCode: null,
+    addressLine: null,
+  }));
 }

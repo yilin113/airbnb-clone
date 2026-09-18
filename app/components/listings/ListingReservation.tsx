@@ -7,6 +7,7 @@ import Button from "../Button";
 interface IListingReservationProps {
   price: number;
   dateRange: Range;
+  selectedNights: number;
   totalPrice: number;
   onChangeDate: (value: Range) => void;
   onSubmit: () => void;
@@ -17,6 +18,7 @@ interface IListingReservationProps {
 const ListingReservation: React.FC<IListingReservationProps> = ({
   price,
   dateRange,
+  selectedNights,
   totalPrice,
   onChangeDate,
   onSubmit,
@@ -45,6 +47,11 @@ const ListingReservation: React.FC<IListingReservationProps> = ({
       />
       <hr />
       <div className="p-4">
+        <div className="mb-3 text-sm text-neutral-600">
+          {selectedNights >= 30
+            ? `已選擇 ${selectedNights} 晚`
+            : `至少入住 30 晚（目前 ${Math.max(0, selectedNights)} 晚）`}
+        </div>
         <Button disabled={disabled} onClick={onSubmit} label="送出入住申請" />
       </div>
       <div

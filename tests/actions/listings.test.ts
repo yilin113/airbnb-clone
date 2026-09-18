@@ -28,7 +28,13 @@ describe("getListings", () => {
     const listings = [makeListing()];
     prismaMock.listing.findMany.mockResolvedValue(listings);
 
-    await expect(getListings({})).resolves.toEqual(listings);
+    await expect(getListings({})).resolves.toEqual(
+      listings.map((listing) => ({
+        ...listing,
+        postalCode: null,
+        addressLine: null,
+      })),
+    );
     expect(prismaMock.listing.findMany).toHaveBeenCalledWith({
       where: {},
       orderBy: { createdAt: "asc" },
@@ -102,7 +108,13 @@ describe("getFavoriteListings", () => {
     getCurrentUser.mockResolvedValue(makeUser({ favoriteIds: ["listing-1"] }));
     prismaMock.listing.findMany.mockResolvedValue(listings);
 
-    await expect(getFavoriteListings()).resolves.toEqual(listings);
+    await expect(getFavoriteListings()).resolves.toEqual(
+      listings.map((listing) => ({
+        ...listing,
+        postalCode: null,
+        addressLine: null,
+      })),
+    );
     expect(prismaMock.listing.findMany).toHaveBeenCalledWith({
       where: { id: { in: ["listing-1"] } },
       orderBy: { createdAt: "asc" },
@@ -135,9 +147,11 @@ describe("getListingById", () => {
     const listing = { ...makeListing(), user };
     prismaMock.listing.findUnique.mockResolvedValue(listing);
 
-    await expect(getListingById({ listingId: "listing-1" })).resolves.toEqual(
-      listing
-    );
+    await expect(getListingById({ listingId: "listing-1" })).resolves.toEqual({
+      ...listing,
+      postalCode: null,
+      addressLine: null,
+    });
     expect(prismaMock.listing.findUnique).toHaveBeenCalledWith({
       where: { id: "listing-1" },
       include: { user: true },
@@ -167,7 +181,16 @@ describe("getReservations", () => {
         userId: "user-1",
         authorId: "author-1",
       })
-    ).resolves.toEqual([reservation]);
+    ).resolves.toEqual([
+      {
+        ...reservation,
+        listing: {
+          ...reservation.listing,
+          postalCode: null,
+          addressLine: null,
+        },
+      },
+    ]);
 
     expect(prismaMock.reservation.findMany).toHaveBeenCalledWith({
       where: {

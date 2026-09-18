@@ -30,11 +30,18 @@ export const listingSchema = z.object({
   title: z.string().trim().min(3).max(120),
   description: z.string().trim().min(10).max(2_000),
   imageSrc: z.string().url().max(2_048),
+  imageSrcs: z.array(z.string().url().max(2_048)).min(1).max(12),
   category: z.string().trim().min(1).max(50),
   roomCount: z.coerce.number().int().min(1).max(50),
   bathroomCount: z.coerce.number().int().min(1).max(50),
   guestCount: z.coerce.number().int().min(1).max(100),
   location: japanLocationSchema,
+  postalCode: z
+    .string()
+    .trim()
+    .regex(/^\d{3}-?\d{4}$/, "Postal code must be a Japanese 7-digit code."),
+  addressLine: z.string().trim().min(5).max(200),
+  stationWalkMinutes: z.coerce.number().int().min(1).max(120),
   price: z.coerce.number().int().min(1).max(100_000_000),
   utilitiesFee: z.coerce.number().int().min(0).max(100_000_000),
   managementFee: z.coerce.number().int().min(0).max(100_000_000),
@@ -44,6 +51,16 @@ export const listingSchema = z.object({
 
 export const reservationDecisionSchema = z.object({
   decision: z.enum(["APPROVED", "DECLINED"]),
+});
+
+export const listingDescriptionAssistSchema = z.object({
+  title: z.string().trim().min(3).max(120),
+  description: z.string().trim().min(10).max(2_000),
+  locationLabel: z.string().trim().min(1).max(200).optional(),
+  stationWalkMinutes: z.coerce.number().int().min(1).max(120).optional(),
+  roomCount: z.coerce.number().int().min(1).max(50),
+  bathroomCount: z.coerce.number().int().min(1).max(50),
+  guestCount: z.coerce.number().int().min(1).max(100),
 });
 
 export const reservationSchema = z

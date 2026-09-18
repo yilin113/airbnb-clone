@@ -130,6 +130,16 @@ describe("ListingClient", () => {
     mockedAxios.post.mockResolvedValue({ data: {} });
     render(<ListingClient listing={listing} currentUser={makeUser()} />);
 
+    act(() => {
+      dateRange.onChange?.({
+        selection: {
+          startDate: new Date(2024, 4, 1),
+          endDate: new Date(2024, 4, 31),
+          key: "selection",
+        },
+      });
+    });
+
     await userEvent.click(screen.getByRole("button", { name: "送出入住申請" }));
 
     await waitFor(() => {
@@ -142,8 +152,36 @@ describe("ListingClient", () => {
     expect(routerMock.push).toHaveBeenCalledWith("/trips");
   });
 
+  it("does not allow a stay shorter than 30 nights", async () => {
+    render(<ListingClient listing={listing} currentUser={makeUser()} />);
+
+    act(() => {
+      dateRange.onChange?.({
+        selection: {
+          startDate: new Date(2024, 4, 1),
+          endDate: new Date(2024, 4, 14),
+          key: "selection",
+        },
+      });
+    });
+
+    expect(screen.getByText("至少入住 30 晚（目前 13 晚）")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "送出入住申請" })).toBeDisabled();
+    expect(mockedAxios.post).not.toHaveBeenCalled();
+  });
+
   it("asks an anonymous visitor to log in first", async () => {
     render(<ListingClient listing={listing} />);
+
+    act(() => {
+      dateRange.onChange?.({
+        selection: {
+          startDate: new Date(2024, 4, 1),
+          endDate: new Date(2024, 4, 31),
+          key: "selection",
+        },
+      });
+    });
 
     await userEvent.click(screen.getByRole("button", { name: "送出入住申請" }));
 

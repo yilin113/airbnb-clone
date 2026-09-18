@@ -32,12 +32,14 @@ const RentModal = () => {
   const rentModal = useRentModal();
   const [step, setStep] = useState(STEPS.CATEGORY);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOptimizingDescription, setIsOptimizingDescription] = useState(false);
   const router = useRouter();
 
   const {
     register,
     handleSubmit,
     setValue,
+    trigger,
     watch,
     formState: { errors },
     reset,
@@ -49,6 +51,7 @@ const RentModal = () => {
       roomCount: 1,
       bathroomCount: 1,
       imageSrc: "",
+      imageSrcs: [],
       price: 1,
       utilitiesFee: 0,
       managementFee: 0,
@@ -56,6 +59,9 @@ const RentModal = () => {
       deposit: 0,
       title: "",
       description: "",
+      postalCode: "",
+      addressLine: "",
+      stationWalkMinutes: 5,
     },
   });
 
@@ -64,8 +70,10 @@ const RentModal = () => {
   const guestCount = watch("guestCount");
   const roomCount = watch("roomCount");
   const bathroomCount = watch("bathroomCount");
-  const imageSrc = watch("imageSrc");
+  const imageSrcs = watch("imageSrcs") as string[];
+  const title = watch("title");
   const description = watch("description");
+  const stationWalkMinutes = watch("stationWalkMinutes");
 
   const setCustomValue = (id: string, value: unknown) => {
     setValue(id, value, {
@@ -79,7 +87,7 @@ const RentModal = () => {
     setStep((prev) => prev - 1);
   };
 
-  const onNext = () => {
+  const onNext = async () => {
     if (step === STEPS.CATEGORY && !category) {
       toast.error("請先選擇房源類型");
       return;
@@ -90,8 +98,21 @@ const RentModal = () => {
       return;
     }
 
-    if (step === STEPS.IMAGES && !imageSrc) {
+    if (
+      step === STEPS.LOCATION &&
+      !(await trigger(["postalCode", "addressLine", "stationWalkMinutes"]))
+    ) {
+      toast.error("請補齊有效的日本地址資料");
+      return;
+    }
+
+    if (step === STEPS.IMAGES && !imageSrcs.length) {
       toast.error("請至少上傳一張房源照片");
+      return;
+    }
+
+    if (step === STEPS.DESCRIPTION && !(await trigger(["title", "description"]))) {
+      toast.error("請補齊房源名稱與至少 30 個字的介紹");
       return;
     }
 
@@ -131,6 +152,9 @@ const RentModal = () => {
               imageSrc: "房源照片",
               category: "房源類型",
               location: "房源地點",
+              postalCode: "郵遞區號",
+              addressLine: "完整地址",
+              stationWalkMinutes: "車站步行時間",
               price: "每月租金",
             };
             toast.error(`${labels[issuePath] ?? "刊登資料"}尚未正確填寫`);
@@ -143,6 +167,48 @@ const RentModal = () => {
       .finally(() => {
         setIsLoading(false);
       });
+  };
+
+  const onOptimizeDescription = async () => {
+    if (
+      typeof title !== "string" ||
+      title.trim().length < 3 ||
+      typeof description !== "string" ||
+      description.trim().length < 10
+    ) {
+      toast.error("請先填寫房源名稱與至少 10 個字的基本資料");
+      return;
+    }
+
+    setIsOptimizingDescription(true);
+
+    try {
+      const response = await axios.post("/api/ai/listing-description", {
+        title,
+        description,
+        locationLabel: location
+          ? `${location.label}，${location.region}`
+          : undefined,
+        stationWalkMinutes,
+        roomCount,
+        bathroomCount,
+        guestCount,
+      });
+
+      setCustomValue("description", response.data.description);
+      toast.success("AI 草稿已產生，請確認內容是否符合實際房況");
+    } catch (error: unknown) {
+      if (
+        axios.isAxiosError(error) &&
+        error.response?.data?.error?.code === "AI_UNAVAILABLE"
+      ) {
+        toast.error("AI 文案服務尚未設定，需先加入 OpenAI API key");
+      } else {
+        toast.error("目前無法產生 AI 草稿，請稍後再試");
+      }
+    } finally {
+      setIsOptimizingDescription(false);
+    }
   };
 
   const actionLabel = useMemo(() => {
@@ -203,6 +269,50 @@ const RentModal = () => {
           onChange={(value) => setCustomValue("location", value)}
           value={location}
         />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Input
+            id="postalCode"
+            label="日本郵遞區號（例：110-0005）"
+            disabled={isLoading}
+            register={register}
+            errors={errors}
+            required
+            validation={{
+              pattern: {
+                value: /^\d{3}-?\d{4}$/,
+                message: "請輸入 7 碼日本郵遞區號",
+              },
+            }}
+          />
+          <Input
+            id="stationWalkMinutes"
+            label="步行至車站（分鐘）"
+            type="number"
+            disabled={isLoading}
+            register={register}
+            errors={errors}
+            required
+            validation={{
+              min: { value: 1, message: "步行時間至少 1 分鐘" },
+              max: { value: 120, message: "步行時間最多 120 分鐘" },
+            }}
+          />
+        </div>
+        <Input
+          id="addressLine"
+          label="完整地址（不會公開顯示）"
+          disabled={isLoading}
+          register={register}
+          errors={errors}
+          required
+          validation={{
+            minLength: { value: 5, message: "請輸入完整地址" },
+            maxLength: { value: 200, message: "地址最多 200 個字元" },
+          }}
+        />
+        <div className="rounded-lg bg-neutral-100 p-3 text-sm leading-6 text-neutral-600">
+          公開頁面只顯示城市、行政區與最近車站；完整地址只供平台管理與確認入住後提供。
+        </div>
         <Map key={location?.value} center={location?.latlng} />
       </div>
     );
@@ -244,11 +354,14 @@ const RentModal = () => {
       <div className="flex flex-col gap-8">
         <Heading
           title="上傳房源照片"
-          subtitle="請先上傳一張封面照；之後可擴充多張照片與排序"
+          subtitle="最多 12 張；第一張是封面，可隨時調整或移除"
         />
         <ImageUpload
-          value={imageSrc}
-          onChange={(value) => setCustomValue("imageSrc", value)}
+          value={imageSrcs}
+          onChange={(images) => {
+            setCustomValue("imageSrcs", images);
+            setCustomValue("imageSrc", images[0] ?? "");
+          }}
         />
       </div>
     );
@@ -291,6 +404,17 @@ const RentModal = () => {
         <div className="rounded-lg bg-rose-50 p-4 text-sm leading-6 text-neutral-700">
           建議包含：步行到車站時間、網路與工作空間、廚房及洗衣設備、周邊採買、噪音與入住限制。
         </div>
+        <button
+          type="button"
+          onClick={onOptimizeDescription}
+          disabled={isOptimizingDescription}
+          className="rounded-lg border border-rose-500 px-4 py-3 font-semibold text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isOptimizingDescription ? "正在整理文案…" : "AI 優化成繁體中文介紹"}
+        </button>
+        <p className="text-xs leading-5 text-neutral-500">
+          AI 只會整理你提供的資料；產生後請自行確認，不會自動刊登。
+        </p>
       </div>
     );
   }
@@ -362,7 +486,7 @@ const RentModal = () => {
       isOpen={rentModal.isOpen}
       disabled={isLoading}
       onClose={rentModal.onClose}
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={step === STEPS.PRICE ? handleSubmit(onSubmit) : onNext}
       actionLabel={actionLabel}
       secondaryActionLabel={secondaryActionLabel}
       secondaryAction={step === STEPS.CATEGORY ? undefined : onBack}

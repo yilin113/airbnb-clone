@@ -138,6 +138,24 @@ describe("ListingHead", () => {
       "https://example.com/loft.png",
     );
   });
+
+  it("renders a multi-photo gallery when additional photos exist", () => {
+    render(
+      <ListingHead
+        title="Sunny loft"
+        locationValue="tokyo-shinjuku"
+        imageSrc="https://example.com/loft.png"
+        imageSrcs={[
+          "https://example.com/loft.png",
+          "https://example.com/kitchen.png",
+        ]}
+        id="listing-1"
+      />,
+    );
+
+    expect(screen.getByAltText("Image")).toBeInTheDocument();
+    expect(screen.getByAltText("房源照片 2")).toBeInTheDocument();
+  });
 });
 
 describe("ListingInfo", () => {
@@ -202,6 +220,7 @@ describe("ListingReservation", () => {
         price={120}
         totalPrice={480}
         dateRange={dateRange}
+        selectedNights={30}
         onChangeDate={vi.fn()}
         onSubmit={onSubmit}
       />,
@@ -226,6 +245,7 @@ describe("ListingReservation", () => {
         price={120}
         totalPrice={480}
         dateRange={dateRange}
+        selectedNights={30}
         onChangeDate={onChangeDate}
         onSubmit={vi.fn()}
         disabled

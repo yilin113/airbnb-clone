@@ -22,6 +22,8 @@ export default async function getListingById(params: IGetListingById) {
 
   return {
     ...listing,
+    postalCode: null,
+    addressLine: null,
     user: {
       ...listing.user,
     },

@@ -10,6 +10,7 @@ type ApiErrorCode =
   | "INVALID_RESERVATION_STATE"
   | "BOOKING_CONFLICT"
   | "EMAIL_ALREADY_EXISTS"
+  | "AI_UNAVAILABLE"
   | "INTERNAL_ERROR";
 
 export function apiError(

@@ -70,5 +70,9 @@ export default async function getListings(params: IListingParams) {
     },
   });
 
-  return listings;
+  return listings.map((listing) => ({
+    ...listing,
+    postalCode: null,
+    addressLine: null,
+  }));
 }

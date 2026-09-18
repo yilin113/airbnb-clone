@@ -42,7 +42,7 @@ describe("ImageUpload", () => {
   it("opens the Cloudinary widget on click", async () => {
     const open = vi.fn();
     widget.open = open;
-    render(<ImageUpload value="" onChange={vi.fn()} />);
+    render(<ImageUpload value={[]} onChange={vi.fn()} />);
 
     await userEvent.click(screen.getByText("選擇或拖曳房源照片"));
 
@@ -50,7 +50,7 @@ describe("ImageUpload", () => {
   });
 
   it("is inert while the widget has not handed back an opener", async () => {
-    render(<ImageUpload value="" onChange={vi.fn()} />);
+    render(<ImageUpload value={[]} onChange={vi.fn()} />);
 
     await userEvent.click(screen.getByText("選擇或拖曳房源照片"));
 
@@ -59,19 +59,19 @@ describe("ImageUpload", () => {
 
   it("publishes the uploaded url", () => {
     const onChange = vi.fn();
-    render(<ImageUpload value="" onChange={onChange} />);
+    render(<ImageUpload value={[]} onChange={onChange} />);
 
     widget.onSuccess?.(
       { info: { secure_url: "https://res.cloudinary.com/x.png" } },
       {},
     );
 
-    expect(onChange).toHaveBeenCalledWith("https://res.cloudinary.com/x.png");
+    expect(onChange).toHaveBeenCalledWith(["https://res.cloudinary.com/x.png"]);
   });
 
   it("ignores a result that carries no upload info", () => {
     const onChange = vi.fn();
-    render(<ImageUpload value="" onChange={onChange} />);
+    render(<ImageUpload value={[]} onChange={onChange} />);
 
     widget.onSuccess?.({ info: undefined }, {});
     widget.onSuccess?.({ info: "just-a-public-id" }, {});
@@ -80,7 +80,7 @@ describe("ImageUpload", () => {
   });
 
   it("shows the Cloudinary error instead of failing silently", () => {
-    render(<ImageUpload value="" onChange={vi.fn()} />);
+    render(<ImageUpload value={[]} onChange={vi.fn()} />);
 
     widget.onError?.({ statusText: "File format is not allowed" });
 
@@ -89,17 +89,37 @@ describe("ImageUpload", () => {
     );
   });
 
-  it("previews an already uploaded image", () => {
+  it("previews already uploaded images", () => {
     render(
       <ImageUpload
-        value="https://res.cloudinary.com/loft.png"
+        value={[
+          "https://res.cloudinary.com/loft.png",
+          "https://res.cloudinary.com/kitchen.png",
+        ]}
         onChange={vi.fn()}
       />,
     );
 
-    expect(screen.getByAltText("Uploaded image")).toHaveAttribute(
+    expect(screen.getByAltText("房源照片 1")).toHaveAttribute(
       "src",
       "https://res.cloudinary.com/loft.png",
     );
+    expect(screen.getByAltText("房源照片 2")).toBeInTheDocument();
+    expect(screen.getByText("封面")).toBeInTheDocument();
+  });
+
+  it("can choose a cover and remove an image", async () => {
+    const onChange = vi.fn();
+    const images = [
+      "https://res.cloudinary.com/loft.png",
+      "https://res.cloudinary.com/kitchen.png",
+    ];
+    render(<ImageUpload value={images} onChange={onChange} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "設為封面 2" }));
+    expect(onChange).toHaveBeenCalledWith([images[1], images[0]]);
+
+    await userEvent.click(screen.getByRole("button", { name: "移除照片 1" }));
+    expect(onChange).toHaveBeenCalledWith([images[1]]);
   });
 });

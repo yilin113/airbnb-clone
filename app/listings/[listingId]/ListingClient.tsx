@@ -63,12 +63,17 @@ const ListingClient: React.FC<IListingClientProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [dateRange, setDateRange] = useState<Range>(initialDateRange);
 
+  const selectedNights = useMemo(() => {
+    if (!dateRange.startDate || !dateRange.endDate) {
+      return 0;
+    }
+
+    return differenceInCalendarDays(dateRange.endDate, dateRange.startDate);
+  }, [dateRange]);
+
   const totalPrice = useMemo(() => {
     if (dateRange.startDate && dateRange.endDate) {
-      const dayCount = differenceInCalendarDays(
-        dateRange.endDate,
-        dateRange.startDate
-      );
+      const dayCount = selectedNights;
 
       if (dayCount && listing.price) {
         return calculateReservationQuote({
@@ -84,7 +89,7 @@ const ListingClient: React.FC<IListingClientProps> = ({
     }
 
     return listing.price;
-  }, [dateRange, listing, pricingConfig]);
+  }, [dateRange, listing, pricingConfig, selectedNights]);
 
   const onCreateReservation = useCallback(async () => {
     if (!currentUser) {
@@ -92,6 +97,11 @@ const ListingClient: React.FC<IListingClientProps> = ({
     }
 
     if (!dateRange.startDate || !dateRange.endDate) {
+      return;
+    }
+
+    if (selectedNights < 30) {
+      toast.error("中期旅居至少需要入住 30 晚");
       return;
     }
 
@@ -111,7 +121,7 @@ const ListingClient: React.FC<IListingClientProps> = ({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [dateRange, listing.id, currentUser, loginModal, router]);
+  }, [dateRange, listing.id, currentUser, loginModal, router, selectedNights]);
 
   const category = useMemo(() => {
     return categories.find((item) => item.label === listing.category);
@@ -124,6 +134,7 @@ const ListingClient: React.FC<IListingClientProps> = ({
           <ListingHead
             title={listing.title}
             imageSrc={listing.imageSrc}
+            imageSrcs={listing.imageSrcs}
             locationValue={listing.locationValue}
             id={listing.id}
             currentUser={currentUser}
@@ -161,8 +172,9 @@ const ListingClient: React.FC<IListingClientProps> = ({
                 totalPrice={totalPrice}
                 onChangeDate={(value: Range) => setDateRange(value)}
                 dateRange={dateRange}
+                selectedNights={selectedNights}
                 onSubmit={onCreateReservation}
-                disabled={isLoading}
+                disabled={isLoading || selectedNights < 30}
                 disabledDates={disableDates}
               />
             </div>

@@ -40,6 +40,14 @@ export default async function getReservations(params: Reservation) {
     ...reservation,
     listing: {
       ...reservation.listing,
+      postalCode:
+        reservation.status === "APPROVED"
+          ? reservation.listing.postalCode
+          : null,
+      addressLine:
+        reservation.status === "APPROVED"
+          ? reservation.listing.addressLine
+          : null,
     },
   }));
 }

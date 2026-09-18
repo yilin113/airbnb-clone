@@ -19,8 +19,8 @@ vi.mock("@/app/components/Map", () => ({
 }));
 
 vi.mock("@/app/components/Inputs/ImageUpload", () => ({
-  default: ({ onChange }: { onChange: (value: string) => void }) => (
-    <button type="button" onClick={() => onChange("https://cdn/loft.png")}>
+  default: ({ onChange }: { onChange: (value: string[]) => void }) => (
+    <button type="button" onClick={() => onChange(["https://cdn/loft.png"])}>
       upload
     </button>
   ),
@@ -43,6 +43,14 @@ async function walkToPrice() {
   await userEvent.click(location);
   await userEvent.type(location, "新宿");
   await userEvent.keyboard("{Enter}");
+  await userEvent.type(
+    document.querySelector("#postalCode") as HTMLElement,
+    "160-0022",
+  );
+  await userEvent.type(
+    document.querySelector("#addressLine") as HTMLElement,
+    "東京都新宿區新宿一丁目",
+  );
   await next(); // -> info
   await next(); // -> images
   await userEvent.click(screen.getByRole("button", { name: "upload" }));
@@ -91,6 +99,14 @@ describe("RentModal", () => {
     await userEvent.click(country);
     await userEvent.type(country, "新宿");
     await userEvent.keyboard("{Enter}");
+    await userEvent.type(
+      document.querySelector("#postalCode") as HTMLElement,
+      "160-0022",
+    );
+    await userEvent.type(
+      document.querySelector("#addressLine") as HTMLElement,
+      "東京都新宿區新宿一丁目",
+    );
 
     await next();
     expect(
@@ -163,6 +179,14 @@ describe("RentModal", () => {
     await userEvent.click(location);
     await userEvent.type(location, "新宿");
     await userEvent.keyboard("{Enter}");
+    await userEvent.type(
+      document.querySelector("#postalCode") as HTMLElement,
+      "160-0022",
+    );
+    await userEvent.type(
+      document.querySelector("#addressLine") as HTMLElement,
+      "東京都新宿區新宿一丁目",
+    );
     await next();
 
     // [guest -, guest +, room -, room +, bathroom -, bathroom +]
@@ -189,6 +213,10 @@ describe("RentModal", () => {
         expect.objectContaining({
           category: "Beach",
           imageSrc: "https://cdn/loft.png",
+          imageSrcs: ["https://cdn/loft.png"],
+          postalCode: "160-0022",
+          addressLine: "東京都新宿區新宿一丁目",
+          stationWalkMinutes: 5,
           title: "Sunny loft",
           description:
             "Very sunny and quiet apartment near the station with reliable Wi-Fi.",
