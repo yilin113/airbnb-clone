@@ -29,13 +29,16 @@ as each capability is activated.
 - Email/password registration remains available while OAuth credentials are
   absent.
 
-### Map and station provider
+### Google Maps Platform
 
-- Needed in Phase 2 for Japan-only prefecture, city, and station selection.
-- Select either Mapbox or Google Maps only after comparing Japanese address,
-  station, licensing, and expected traffic costs.
-- Prefer a versioned open Japanese railway dataset for canonical station IDs;
-  do not use a map search result as the permanent station identifier.
+- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` activates Japan-only address autocomplete
+  in the host listing flow. Manual address entry remains available if the API
+  is unavailable.
+- Restrict the browser key to the production web origin and only the Places API
+  (New) plus Maps JavaScript API.
+- Place selection fills the Japanese postal code, private full address, and map
+  coordinates. The curated station catalogue remains the canonical public
+  station identifier until a versioned Japanese railway dataset is adopted.
 
 ## Post-MVP
 

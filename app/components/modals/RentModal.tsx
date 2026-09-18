@@ -8,6 +8,7 @@ import { categories } from "../navbar/Categories";
 import CategoryInput from "../Inputs/CategoryInput";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import CountrySelect from "../Inputs/CountrySelect";
+import GoogleAddressAutocomplete from "../Inputs/GoogleAddressAutocomplete";
 import dynamic from "next/dynamic";
 import Counter from "../Inputs/Counter";
 import ImageUpload from "../Inputs/ImageUpload";
@@ -33,6 +34,9 @@ const RentModal = () => {
   const [step, setStep] = useState(STEPS.CATEGORY);
   const [isLoading, setIsLoading] = useState(false);
   const [isOptimizingDescription, setIsOptimizingDescription] = useState(false);
+  const [addressCenter, setAddressCenter] = useState<
+    [number, number] | undefined
+  >();
   const router = useRouter();
 
   const {
@@ -269,6 +273,19 @@ const RentModal = () => {
           onChange={(value) => setCustomValue("location", value)}
           value={location}
         />
+        <GoogleAddressAutocomplete
+          disabled={isLoading}
+          onSelect={({ address, postalCode, latlng }) => {
+            setCustomValue("addressLine", address);
+            if (postalCode) {
+              setCustomValue("postalCode", postalCode);
+            }
+            if (latlng) {
+              setAddressCenter(latlng);
+            }
+            toast.success("已帶入日本地址與地圖位置");
+          }}
+        />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Input
             id="postalCode"
@@ -313,7 +330,10 @@ const RentModal = () => {
         <div className="rounded-lg bg-neutral-100 p-3 text-sm leading-6 text-neutral-600">
           公開頁面只顯示城市、行政區與最近車站；完整地址只供平台管理與確認入住後提供。
         </div>
-        <Map key={location?.value} center={location?.latlng} />
+        <Map
+          key={`${location?.value ?? "japan"}-${addressCenter?.join(",") ?? "station"}`}
+          center={addressCenter ?? location?.latlng}
+        />
       </div>
     );
   }

@@ -230,3 +230,21 @@
 - `eslint .`: zero errors; the pre-existing React Compiler warning in
   `RentModal.tsx` remains.
 - `next typegen && tsc --noEmit`: passed.
+
+## 2026-09-18 — Google Places address autocomplete
+
+### Scope
+
+- Added the current Google Places `PlaceAutocompleteElement` to the host
+  location step, restricted to Japanese results.
+- Selecting an address now fills the private full address, Japanese postal
+  code, and exact map coordinates while preserving manual-entry fallback.
+- Documented the browser environment variable and required domain/API key
+  restrictions.
+
+### Verification
+
+- `vitest run`: 31 files, 269 tests passed.
+- `eslint .`: zero errors; the pre-existing React Compiler warning in
+  `RentModal.tsx` remains.
+- `next typegen && tsc --noEmit`: passed.
