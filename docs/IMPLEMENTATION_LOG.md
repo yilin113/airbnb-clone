@@ -266,3 +266,30 @@
   `RentModal.tsx` remains.
 - `next typegen && tsc --noEmit`: passed.
 - Responsive production browser verification will follow deployment.
+
+## 2026-09-18 — Nationwide Japanese railway-station search
+
+### Scope
+
+- Replaced the fixed location dropdown with live Google Places station
+  suggestions restricted to Japan.
+- Added JR, private railway, subway, light-rail, transit-station, and tram-stop
+  result types while retaining the curated station list as a no-key/error
+  fallback.
+- Fetches detailed place data only after a host selects a suggestion, then
+  stores the stable Google place ID, station name, prefecture/city label, and
+  exact coordinates with the listing.
+- Updated listing creation, search labels, cards, detail headings, and maps to
+  support stations outside the original curated list without breaking existing
+  listings.
+
+### Verification
+
+- `vitest run`: 31 files, 271 tests passed, including a live-station contract
+  test for `茨城` → `水戸駅`.
+- `eslint .`: zero errors; the pre-existing React Compiler warning in
+  `RentModal.tsx` remains.
+- `next typegen && tsc --noEmit`: passed.
+- `next build`: compilation and TypeScript passed; local prerender stopped only
+  because this checkout intentionally has no `DATABASE_URL`. Vercel provides
+  the configured production variable during deployment.

@@ -58,9 +58,14 @@ model Listing {
   bathroomCount      Int
   guestCount         Int
   locationValue      String
+  locationLabel      String?
+  locationRegion     String?
+  locationLatitude   Float?
+  locationLongitude  Float?
   prefectureCode     String
   cityCode           String
   stationCode        String
+  stationName        String?
   postalCode         String?
   addressLine        String?
   stationWalkMinutes Int?

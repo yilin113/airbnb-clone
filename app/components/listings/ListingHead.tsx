@@ -9,6 +9,8 @@ import HeartButton from "../HeartButton";
 interface IListingHeadProps {
   title: string;
   locationValue: string;
+  locationLabel?: string | null;
+  locationRegion?: string | null;
   imageSrc: string;
   imageSrcs?: string[];
   id: string;
@@ -18,6 +20,8 @@ interface IListingHeadProps {
 const ListingHead: React.FC<IListingHeadProps> = ({
   title,
   locationValue,
+  locationLabel,
+  locationRegion,
   imageSrc,
   imageSrcs = [],
   id,
@@ -26,6 +30,10 @@ const ListingHead: React.FC<IListingHeadProps> = ({
   const { getByValue } = useCountries();
 
   const location = getByValue(locationValue);
+  const displayedLocation =
+    [locationRegion ?? location?.region, locationLabel ?? location?.label]
+      .filter(Boolean)
+      .join(", ") || "日本房源";
   const images = imageSrcs.length ? imageSrcs : [imageSrc];
   const visibleImages = images.slice(0, 5);
 
@@ -33,7 +41,7 @@ const ListingHead: React.FC<IListingHeadProps> = ({
     <>
       <Heading
         title={title}
-        subtitle={`${location?.region}, ${location?.label}`}
+        subtitle={displayedLocation}
       />
       <div
         className={`relative grid h-[60vh] w-full overflow-hidden rounded-xl ${

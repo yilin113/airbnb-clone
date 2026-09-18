@@ -62,6 +62,7 @@ const SearchModal = () => {
     const updatedQuery: qs.StringifiableRecord = {
       ...currentQuery,
       locationValue: location?.value,
+      locationLabel: location?.label,
       guestCount,
       roomCount,
       bathroomCount,
@@ -119,11 +120,11 @@ const SearchModal = () => {
     <div className="flex flex-col gap-8">
       <Heading
         title="想住在日本哪裡？"
-        subtitle="選擇都道府縣、城市與車站"
+        subtitle="搜尋最靠近房源的 JR、私鐵、地鐵或火車站"
       />
       <CountrySelect
         value={location}
-        onChange={(value) => setLocation(value as CountrySelectValue)}
+        onChange={(value) => setLocation(value ?? undefined)}
       />
       <hr />
       <Map key={location?.value} center={location?.latlng} />

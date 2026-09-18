@@ -35,6 +35,9 @@ const ListingCard: React.FC<ListingCardProps> = ({
   const { getByValue } = useCountries();
 
   const location = getByValue(data.locationValue);
+  const locationLabel =
+    data.locationLabel ?? location?.label ?? data.stationName ?? "日本車站";
+  const locationRegion = data.locationRegion ?? location?.region ?? "日本";
 
   const handleCancel = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -108,7 +111,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
           </div>
         </div>
         <div className="font-semibold text-lg">
-          {location?.region}, {location?.label}
+          {locationRegion}, {locationLabel}
         </div>
         <div className="font-light text-neutral-500">
           {reservationDate || data.category}

@@ -267,7 +267,7 @@ const RentModal = () => {
       <div className="flex flex-col gap-8">
         <Heading
           title="房源位於日本哪裡？"
-          subtitle="先選擇最接近的城市與車站；完整地址只會提供給確認入住的房客"
+          subtitle="先搜尋最靠近房源的鐵路車站；完整地址只會提供給確認入住的房客"
         />
         <CountrySelect
           onChange={(value) => setCustomValue("location", value)}

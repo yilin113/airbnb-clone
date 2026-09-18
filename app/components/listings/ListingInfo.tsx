@@ -18,6 +18,8 @@ interface IListingInfoProps {
   roomCount: number;
   bathroomCount: number;
   locationValue: string;
+  locationLatitude?: number | null;
+  locationLongitude?: number | null;
   category:
     | {
         label: string;
@@ -34,11 +36,16 @@ const ListingInfo: React.FC<IListingInfoProps> = ({
   roomCount,
   bathroomCount,
   locationValue,
+  locationLatitude,
+  locationLongitude,
   category,
 }) => {
   const { getByValue } = useCountries();
 
-  const coordinates = getByValue(locationValue)?.latlng;
+  const coordinates =
+    locationLatitude != null && locationLongitude != null
+      ? ([locationLatitude, locationLongitude] as [number, number])
+      : getByValue(locationValue)?.latlng;
 
   return (
     <div className="col-span-4 flex flex-col gap-8">

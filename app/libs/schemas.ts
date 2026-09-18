@@ -3,10 +3,19 @@ import { japanLocations } from "@/app/data/japanLocations";
 
 const japanLocationSchema = z
   .object({
-    value: z.string().trim().min(1).max(20),
-    prefectureCode: z.string().trim().min(1).max(10),
-    cityCode: z.string().trim().min(1).max(10),
-    stationCode: z.string().trim().min(1).max(20),
+    value: z.string().trim().min(1).max(255),
+    label: z.string().trim().min(1).max(200).optional(),
+    latlng: z.tuple([
+      z.number().min(20).max(46),
+      z.number().min(122).max(154),
+    ]).optional(),
+    region: z.string().trim().min(1).max(200).optional(),
+    prefectureCode: z.string().trim().min(1).max(100),
+    prefecture: z.string().trim().min(1).max(100).optional(),
+    cityCode: z.string().trim().min(1).max(100),
+    city: z.string().trim().min(1).max(100).optional(),
+    stationCode: z.string().trim().min(1).max(255),
+    station: z.string().trim().min(1).max(200).optional(),
   })
   .refine(
     (value) =>
@@ -16,7 +25,14 @@ const japanLocationSchema = z
           location.prefectureCode === value.prefectureCode &&
           location.cityCode === value.cityCode &&
           location.stationCode === value.stationCode,
-      ),
+      ) ||
+      (value.value === `google:${value.stationCode}` &&
+        Boolean(value.label) &&
+        Boolean(value.latlng) &&
+        Boolean(value.region) &&
+        Boolean(value.prefecture) &&
+        Boolean(value.city) &&
+        Boolean(value.station)),
     { message: "Location must match a supported Japanese station." },
   );
 

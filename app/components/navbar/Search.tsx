@@ -13,17 +13,18 @@ const Search = () => {
   const { getByValue } = useCountries();
 
   const locationValue = params?.get("locationValue");
+  const searchedLocationLabel = params?.get("locationLabel");
   const startDate = params?.get("startDate");
   const endDate = params?.get("endDate");
   const guestCount = params?.get("guestCount");
 
   const locationLabel = useMemo(() => {
     if (locationValue) {
-      return getByValue(locationValue as string)?.label;
+      return searchedLocationLabel ?? getByValue(locationValue)?.label;
     }
 
     return "日本地點";
-  }, [locationValue, getByValue]);
+  }, [locationValue, searchedLocationLabel, getByValue]);
 
   const durationLabel = useMemo(() => {
     if (startDate && endDate) {

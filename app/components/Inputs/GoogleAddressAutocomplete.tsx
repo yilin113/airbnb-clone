@@ -13,29 +13,32 @@ interface GoogleAddressAutocompleteProps {
   onSelect: (selection: GoogleAddressSelection) => void;
 }
 
-interface GoogleAddressComponent {
+export interface GoogleAddressComponent {
   longText?: string;
   types?: string[];
 }
 
-interface GooglePlace {
+export interface GooglePlace {
+  id?: string;
+  displayName?: string;
   formattedAddress?: string;
   addressComponents?: GoogleAddressComponent[];
   location?: { lat: () => number; lng: () => number };
   fetchFields: (options: { fields: string[] }) => Promise<void>;
 }
 
-interface GooglePlacePrediction {
+export interface GooglePlacePrediction {
   text: { toString: () => string };
   toPlace: () => GooglePlace;
 }
 
-interface GooglePlacesLibrary {
+export interface GooglePlacesLibrary {
   AutocompleteSessionToken: new () => object;
   AutocompleteSuggestion: {
     fetchAutocompleteSuggestions: (request: {
       input: string;
       includedRegionCodes: string[];
+      includedPrimaryTypes?: string[];
       language: string;
       region: string;
       sessionToken: object;
@@ -64,7 +67,7 @@ export const getJapanesePostalCode = (
   components?.find((component) => component.types?.includes("postal_code"))
     ?.longText;
 
-const loadPlacesLibrary = (apiKey: string) => {
+export const loadPlacesLibrary = (apiKey: string) => {
   if (window.google?.maps?.importLibrary) {
     return window.google.maps.importLibrary("places");
   }
