@@ -10,11 +10,15 @@ const shinjuku = japanLocations[0];
 describe("CountrySelect", () => {
   it("lists Japanese stations and reports the picked one", async () => {
     const onChange = vi.fn();
-    render(<CountrySelect onChange={onChange} />);
+    const { container } = render(<CountrySelect onChange={onChange} />);
 
     const combobox = screen.getByRole("combobox");
     await userEvent.click(combobox);
     await userEvent.type(combobox, "新宿");
+
+    const listbox = screen.getByRole("listbox");
+    expect(document.body).toContainElement(listbox);
+    expect(container).not.toContainElement(listbox);
 
     // The custom formatOptionLabel renders flag + label + region.
     expect(await screen.findByText("東京都・新宿區")).toBeInTheDocument();

@@ -19,6 +19,10 @@ const CountrySelect: React.FC<CountrySelectProps> = ({ value, onChange }) => {
       <Select
         placeholder="選擇日本城市或車站"
         isClearable
+        menuPortalTarget={
+          typeof document === "undefined" ? undefined : document.body
+        }
+        menuPosition="fixed"
         options={getAll()}
         value={value}
         onChange={(value) => onChange(value as CountrySelectValue)}
@@ -35,6 +39,9 @@ const CountrySelect: React.FC<CountrySelectProps> = ({ value, onChange }) => {
           control: () => "p-3 border-2",
           input: () => "text-lg",
           option: () => "text-lg ",
+        }}
+        styles={{
+          menuPortal: (base) => ({ ...base, zIndex: 100 }),
         }}
         theme={(theme) => ({
           ...theme,

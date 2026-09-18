@@ -194,3 +194,21 @@
 - `eslint .`: zero errors; the pre-existing React Compiler warning in
   `RentModal.tsx` remains.
 - `next typegen && tsc --noEmit`: passed.
+
+## 2026-09-18 — Location dropdown layering fix
+
+### Scope
+
+- Rendered the Japanese city/station menu in a document-level portal with a
+  fixed position and explicit stacking order.
+- Prevented address-field labels and the map from appearing above an expanded
+  station menu.
+- Added a component regression check that confirms the menu is portaled outside
+  the form container.
+
+### Verification
+
+- `vitest run`: 30 files, 265 tests passed.
+- `eslint .`: zero errors; the pre-existing React Compiler warning in
+  `RentModal.tsx` remains.
+- `next typegen && tsc --noEmit`: passed.
