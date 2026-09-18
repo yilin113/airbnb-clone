@@ -212,3 +212,21 @@
 - `eslint .`: zero errors; the pre-existing React Compiler warning in
   `RentModal.tsx` remains.
 - `next typegen && tsc --noEmit`: passed.
+
+## 2026-09-18 — Host location search improvements
+
+### Scope
+
+- Expanded the listing-location search index from station labels to prefecture,
+  city, ward, station code, and stable English location codes.
+- Added Unicode/case/separator normalization, so searches such as `福岡`,
+  `大阪市`, `新宿`, and `FUKUOKA` find the relevant stations.
+- Reworked each result into a scannable two-line station and region layout.
+- Localized the empty-result guidance and added an example hint below the field.
+
+### Verification
+
+- `vitest run`: 30 files, 267 tests passed.
+- `eslint .`: zero errors; the pre-existing React Compiler warning in
+  `RentModal.tsx` remains.
+- `next typegen && tsc --noEmit`: passed.
