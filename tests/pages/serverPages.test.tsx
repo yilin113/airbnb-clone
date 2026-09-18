@@ -58,8 +58,20 @@ describe("RootLayout", () => {
     const { metadata } = await import("@/app/layout");
 
     expect(metadata).toEqual({
-      title: "日本中期旅居",
-      description: "提供台灣旅客赴日居住 30 天以上的中期租賃平台",
+      applicationName: "MACHI STAY",
+      title: {
+        default: "MACHI STAY｜日本中期旅居",
+        template: "%s｜MACHI STAY",
+      },
+      description:
+        "MACHI STAY 提供台灣旅客赴日居住 30 天以上的中期租賃服務。日本で、暮らすように泊まる。",
+      keywords: [
+        "MACHI STAY",
+        "日本中期租屋",
+        "日本旅居",
+        "日本月租",
+        "Japan rental",
+      ],
     });
   });
 });

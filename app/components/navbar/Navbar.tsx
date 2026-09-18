@@ -20,14 +20,18 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
             className="
               flex
               flex-row
+              flex-wrap
               items-center
               justify-between
               gap-3
+              md:flex-nowrap
               md:gap-0
             "
           >
             <Logo />
-            <Search />
+            <div className="order-3 w-full md:order-none md:w-auto">
+              <Search />
+            </div>
             <UserMenu currentUser={currentUser} />
           </div>
         </Container>

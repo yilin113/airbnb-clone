@@ -28,9 +28,24 @@ describe("Logo", () => {
   it("goes home on click", async () => {
     render(<Logo />);
 
-    await userEvent.click(screen.getByAltText("logo"));
+    await userEvent.click(
+      screen.getByRole("button", { name: "返回 MACHI STAY 首頁" }),
+    );
 
     expect(routerMock.push).toHaveBeenCalledWith("/");
+  });
+
+  it("provides the responsive desktop and mobile brand assets", () => {
+    render(<Logo />);
+
+    expect(screen.getByAltText("MACHI STAY")).toHaveAttribute(
+      "src",
+      "/brand/logo-horizontal.png",
+    );
+    expect(screen.getByAltText("MACHI STAY logo mark")).toHaveAttribute(
+      "src",
+      "/brand/logo-mark.png",
+    );
   });
 });
 
@@ -267,7 +282,9 @@ describe("Navbar", () => {
   it("renders the logo, search and user menu", () => {
     render(<Navbar currentUser={makeUser()} />);
 
-    expect(screen.getByAltText("logo")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "返回 MACHI STAY 首頁" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("日本地點")).toBeInTheDocument();
     expect(screen.getByText("刊登房源")).toBeInTheDocument();
   });
