@@ -149,12 +149,12 @@ describe("CountrySelect", () => {
 
     expect(fetchAutocompleteSuggestions).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        input: "茨城",
+        input: "茨城 駅",
         includedRegionCodes: ["jp"],
         includedPrimaryTypes: expect.arrayContaining([
           "train_station",
           "subway_station",
-          "transit_station",
+          "light_rail_station",
         ]),
       }),
     );

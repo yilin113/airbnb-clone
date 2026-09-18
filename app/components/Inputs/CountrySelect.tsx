@@ -26,9 +26,11 @@ const stationTypes = [
   "train_station",
   "subway_station",
   "light_rail_station",
-  "transit_station",
   "tram_stop",
 ];
+
+const toStationSearchInput = (input: string) =>
+  /(?:駅|站|station)/iu.test(input) ? input : `${input} 駅`;
 
 const normalizeSearchText = (value: string) =>
   value
@@ -89,7 +91,7 @@ const CountrySelect: React.FC<CountrySelectProps> = ({ value, onChange }) => {
 
         const { suggestions } =
           await library.AutocompleteSuggestion.fetchAutocompleteSuggestions({
-            input,
+            input: toStationSearchInput(input),
             includedRegionCodes: ["jp"],
             includedPrimaryTypes: stationTypes,
             language: "ja",

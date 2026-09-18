@@ -273,9 +273,10 @@
 
 - Replaced the fixed location dropdown with live Google Places station
   suggestions restricted to Japan.
-- Added JR, private railway, subway, light-rail, transit-station, and tram-stop
-  result types while retaining the curated station list as a no-key/error
-  fallback.
+- Added JR, private railway, subway, light-rail, and tram-stop
+  coverage while excluding broad transit results such as bus stops and
+  airports; queries without `站` or `駅` are automatically station-qualified.
+  The curated station list remains as a no-key/error fallback.
 - Fetches detailed place data only after a host selects a suggestion, then
   stores the stable Google place ID, station name, prefecture/city label, and
   exact coordinates with the listing.
