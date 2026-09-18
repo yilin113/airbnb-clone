@@ -45,6 +45,10 @@ const Input: React.FC<InputProps> = ({
         disabled={disabled}
         {...register(id, {
           required: required ? "此欄位為必填" : false,
+          setValueAs:
+            type === "number"
+              ? (value) => (value === "" ? undefined : Number(value))
+              : undefined,
           ...validation,
         })}
         placeholder=" "

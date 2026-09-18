@@ -12,6 +12,7 @@ import dynamic from "next/dynamic";
 import Counter from "../Inputs/Counter";
 import ImageUpload from "../Inputs/ImageUpload";
 import Input from "../Inputs/Input";
+import Textarea from "../Inputs/Textarea";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -64,6 +65,7 @@ const RentModal = () => {
   const roomCount = watch("roomCount");
   const bathroomCount = watch("bathroomCount");
   const imageSrc = watch("imageSrc");
+  const description = watch("description");
 
   const setCustomValue = (id: string, value: unknown) => {
     setValue(id, value, {
@@ -78,6 +80,21 @@ const RentModal = () => {
   };
 
   const onNext = () => {
+    if (step === STEPS.CATEGORY && !category) {
+      toast.error("請先選擇房源類型");
+      return;
+    }
+
+    if (step === STEPS.LOCATION && !location) {
+      toast.error("請先選擇最接近的城市與車站");
+      return;
+    }
+
+    if (step === STEPS.IMAGES && !imageSrc) {
+      toast.error("請至少上傳一張房源照片");
+      return;
+    }
+
     setStep((prev) => prev + 1);
   };
 
@@ -97,8 +114,31 @@ const RentModal = () => {
         setStep(STEPS.CATEGORY);
         rentModal.onClose();
       })
-      .catch(() => {
-        toast.error("發生錯誤，請稍後再試");
+      .catch((error: unknown) => {
+        if (axios.isAxiosError(error)) {
+          const code = error.response?.data?.error?.code;
+          const issuePath = error.response?.data?.error?.issues?.[0]?.path;
+
+          if (code === "UNAUTHORIZED") {
+            toast.error("登入已逾時，請重新登入後再刊登");
+            return;
+          }
+
+          if (code === "VALIDATION_ERROR") {
+            const labels: Record<string, string> = {
+              title: "房源名稱",
+              description: "房源介紹",
+              imageSrc: "房源照片",
+              category: "房源類型",
+              location: "房源地點",
+              price: "每月租金",
+            };
+            toast.error(`${labels[issuePath] ?? "刊登資料"}尚未正確填寫`);
+            return;
+          }
+        }
+
+        toast.error("無法刊登房源，請稍後再試");
       })
       .finally(() => {
         setIsLoading(false);
@@ -157,7 +197,7 @@ const RentModal = () => {
       <div className="flex flex-col gap-8">
         <Heading
           title="房源位於日本哪裡？"
-          subtitle="請選擇最接近的城市與車站"
+          subtitle="先選擇最接近的城市與車站；完整地址只會提供給確認入住的房客"
         />
         <CountrySelect
           onChange={(value) => setCustomValue("location", value)}
@@ -204,7 +244,7 @@ const RentModal = () => {
       <div className="flex flex-col gap-8">
         <Heading
           title="上傳房源照片"
-          subtitle="之後仍可新增照片"
+          subtitle="請先上傳一張封面照；之後可擴充多張照片與排序"
         />
         <ImageUpload
           value={imageSrc}
@@ -219,7 +259,7 @@ const RentModal = () => {
       <div className="flex flex-col gap-8">
         <Heading
           title="向房客介紹你的房源"
-          subtitle="之後仍可修改"
+          subtitle="清楚說明空間、交通、設備與適合的旅居方式"
         />
         <Input
           id="title"
@@ -228,16 +268,29 @@ const RentModal = () => {
           register={register}
           errors={errors}
           required
+          validation={{
+            minLength: { value: 3, message: "房源名稱至少需要 3 個字元" },
+            maxLength: { value: 120, message: "房源名稱最多 120 個字元" },
+          }}
         />
         <hr />
-        <Input
+        <Textarea
           id="description"
           label="房源介紹"
           disabled={isLoading}
           register={register}
           errors={errors}
           required
+          valueLength={typeof description === "string" ? description.length : 0}
+          maxLength={2000}
+          validation={{
+            minLength: { value: 30, message: "請至少輸入 30 個字元，讓房客了解實際居住情況" },
+            maxLength: { value: 2000, message: "房源介紹最多 2,000 個字元" },
+          }}
         />
+        <div className="rounded-lg bg-rose-50 p-4 text-sm leading-6 text-neutral-700">
+          建議包含：步行到車站時間、網路與工作空間、廚房及洗衣設備、周邊採買、噪音與入住限制。
+        </div>
       </div>
     );
   }
@@ -258,6 +311,7 @@ const RentModal = () => {
           register={register}
           errors={errors}
           required
+          validation={{ min: { value: 1, message: "每月租金必須大於 0" } }}
         />
         <Input
           id="utilitiesFee"
@@ -306,13 +360,14 @@ const RentModal = () => {
   return (
     <Modal
       isOpen={rentModal.isOpen}
+      disabled={isLoading}
       onClose={rentModal.onClose}
       onSubmit={handleSubmit(onSubmit)}
       actionLabel={actionLabel}
       secondaryActionLabel={secondaryActionLabel}
       secondaryAction={step === STEPS.CATEGORY ? undefined : onBack}
       title="刊登日本房源"
-      body={bodyContent}
+      body={<div key={step}>{bodyContent}</div>}
     />
   );
 };

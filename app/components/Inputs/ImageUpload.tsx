@@ -7,6 +7,7 @@ import {
 import { useCallback } from "react";
 import { TbPhotoPlus } from "react-icons/tb";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
 interface ImageUploadProps {
   onChange: (value: string) => void;
@@ -25,12 +26,33 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value }) => {
     [onChange]
   );
 
+  const handleError = useCallback((error: unknown) => {
+    const message =
+      typeof error === "string"
+        ? error
+        : typeof error === "object" && error !== null && "statusText" in error
+          ? String(error.statusText)
+          : "請確認圖片格式與檔案大小後重試";
+
+    if (message.toLowerCase().includes("cloud_name is disabled")) {
+      toast.error("Cloudinary 尚未啟用，請先完成帳戶電子郵件驗證");
+      return;
+    }
+
+    toast.error(`照片上傳失敗：${message}`);
+  }, []);
+
   return (
     <CldUploadWidget
       onSuccess={handleUpload}
+      onError={handleError}
       uploadPreset="Airbnb-clone"
       options={{
+        sources: ["local", "camera", "url"],
+        multiple: false,
         maxFiles: 1,
+        maxFileSize: 10_000_000,
+        clientAllowedFormats: ["jpg", "jpeg", "png", "webp", "avif"],
         styles: {
           palette: {
             window: "#F5F5F5",
@@ -55,7 +77,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value }) => {
     >
       {({ open }) => {
         return (
-          <div
+          <button
+            type="button"
             onClick={() => open?.()}
             className="
               relative
@@ -75,7 +98,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value }) => {
             "
           >
             <TbPhotoPlus size={50} />
-            <div className="font-semibold text-lg">Click to upload a photo</div>
+            <div className="font-semibold text-lg">選擇或拖曳房源照片</div>
+            <div className="text-sm font-normal text-neutral-500">
+              JPG、PNG、WebP 或 AVIF，單張最大 10 MB
+            </div>
             {value && (
               <div className="absolute inset-0 w-full h-full">
                 <Image
@@ -87,7 +113,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value }) => {
                 />
               </div>
             )}
-          </div>
+          </button>
         );
       }}
     </CldUploadWidget>

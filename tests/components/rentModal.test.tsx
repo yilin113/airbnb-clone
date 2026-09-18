@@ -7,7 +7,9 @@ import RentModal from "@/app/components/modals/RentModal";
 import useRentModal from "@/app/hooks/useRentModal";
 import { routerMock } from "../helpers/mocks";
 
-vi.mock("axios", () => ({ default: { post: vi.fn() } }));
+vi.mock("axios", () => ({
+  default: { post: vi.fn(), isAxiosError: vi.fn(() => false) },
+}));
 
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
 vi.mock("react-hot-toast", () => ({ toast, default: toast }));
@@ -37,6 +39,10 @@ const next = () =>
 async function walkToPrice() {
   await userEvent.click(screen.getByText("Beach"));
   await next(); // -> location
+  const location = screen.getByRole("combobox");
+  await userEvent.click(location);
+  await userEvent.type(location, "新宿");
+  await userEvent.keyboard("{Enter}");
   await next(); // -> info
   await next(); // -> images
   await userEvent.click(screen.getByRole("button", { name: "upload" }));
@@ -47,7 +53,7 @@ async function walkToPrice() {
   );
   await userEvent.type(
     document.querySelector("#description") as HTMLElement,
-    "Very sunny",
+    "Very sunny and quiet apartment near the station with reliable Wi-Fi.",
   );
   await next(); // -> price
   const price = document.querySelector("#price") as HTMLElement;
@@ -77,6 +83,7 @@ describe("RentModal", () => {
   it("walks forwards and backwards through every step", async () => {
     render(<RentModal />);
 
+    await userEvent.click(screen.getByText("Beach"));
     await next();
     expect(screen.getByText("房源位於日本哪裡？")).toBeInTheDocument();
 
@@ -95,6 +102,7 @@ describe("RentModal", () => {
       screen.getByText("上傳房源照片"),
     ).toBeInTheDocument();
 
+    await userEvent.click(screen.getByRole("button", { name: "upload" }));
     await next();
     expect(
       screen.getByText("向房客介紹你的房源"),
@@ -113,7 +121,7 @@ describe("RentModal", () => {
     );
     await userEvent.type(
       document.querySelector("#description") as HTMLElement,
-      "Very sunny",
+      "Very sunny and quiet apartment near the station with reliable Wi-Fi.",
     );
 
     await next();
@@ -126,12 +134,35 @@ describe("RentModal", () => {
     expect(
       screen.getByText("向房客介紹你的房源"),
     ).toBeInTheDocument();
+    expect(document.querySelector("#title")).toHaveValue("Sunny loft");
+    expect(document.querySelector("#description")).toHaveValue(
+      "Very sunny and quiet apartment near the station with reliable Wi-Fi.",
+    );
+  });
+
+  it("blocks incomplete steps with a useful message", async () => {
+    render(<RentModal />);
+
+    await next();
+    expect(toast.error).toHaveBeenCalledWith("請先選擇房源類型");
+    expect(screen.getByText("這間房源屬於哪一類？")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByText("Beach"));
+    await next();
+    await next();
+    expect(toast.error).toHaveBeenCalledWith("請先選擇最接近的城市與車站");
+    expect(screen.getByText("房源位於日本哪裡？")).toBeInTheDocument();
   });
 
   it("edits the counters on the info step", async () => {
     render(<RentModal />);
 
+    await userEvent.click(screen.getByText("Beach"));
     await next();
+    const location = screen.getByRole("combobox");
+    await userEvent.click(location);
+    await userEvent.type(location, "新宿");
+    await userEvent.keyboard("{Enter}");
     await next();
 
     // [guest -, guest +, room -, room +, bathroom -, bathroom +]
@@ -159,8 +190,9 @@ describe("RentModal", () => {
           category: "Beach",
           imageSrc: "https://cdn/loft.png",
           title: "Sunny loft",
-          description: "Very sunny",
-          price: "120",
+          description:
+            "Very sunny and quiet apartment near the station with reliable Wi-Fi.",
+          price: 120,
           utilitiesFee: 0,
           managementFee: 0,
           cleaningFee: 0,
@@ -181,7 +213,7 @@ describe("RentModal", () => {
     await userEvent.click(screen.getByRole("button", { name: "刊登房源" }));
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("發生錯誤，請稍後再試");
+      expect(toast.error).toHaveBeenCalledWith("無法刊登房源，請稍後再試");
     });
     expect(useRentModal.getState().isOpen).toBe(true);
   });
