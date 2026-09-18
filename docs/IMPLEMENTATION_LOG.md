@@ -176,3 +176,21 @@
 - Avast HTTPS scanning intercepted MongoDB TLS traffic during provisioning.
   Synchronization was completed only after validating the direct Atlas
   certificate chain. HTTPS scanning must be re-enabled after provisioning.
+
+## 2026-09-18 — Multi-image upload state fix
+
+### Scope
+
+- Fixed sequential Cloudinary upload callbacks overwriting one another when a
+  host selected multiple photos in one upload session.
+- Kept the local image reference synchronized for upload, removal, and cover
+  selection actions so the gallery preserves every successful upload.
+- Added a regression test covering three Cloudinary success callbacks delivered
+  before React re-renders the parent form.
+
+### Verification
+
+- `vitest run tests/components/imageUpload.test.tsx`: 8 tests passed.
+- `eslint .`: zero errors; the pre-existing React Compiler warning in
+  `RentModal.tsx` remains.
+- `next typegen && tsc --noEmit`: passed.

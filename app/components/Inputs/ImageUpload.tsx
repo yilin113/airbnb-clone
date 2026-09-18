@@ -4,7 +4,7 @@ import {
   CldUploadWidget,
   type CloudinaryUploadWidgetResults,
 } from "next-cloudinary";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { TbPhotoPlus } from "react-icons/tb";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -17,33 +17,56 @@ interface ImageUploadProps {
 const MAX_IMAGES = 12;
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value }) => {
+  const valueRef = useRef(value);
+
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
   const handleUpload = useCallback(
     (result: CloudinaryUploadWidgetResults) => {
       const info = result.info;
+      const currentImages = valueRef.current;
 
-      if (!info || typeof info === "string" || value.includes(info.secure_url)) {
+      if (
+        !info ||
+        typeof info === "string" ||
+        currentImages.includes(info.secure_url)
+      ) {
         return;
       }
 
-      if (value.length >= MAX_IMAGES) {
+      if (currentImages.length >= MAX_IMAGES) {
         toast.error(`最多可上傳 ${MAX_IMAGES} 張照片`);
         return;
       }
 
-      onChange([...value, info.secure_url]);
+      const nextImages = [...currentImages, info.secure_url];
+      valueRef.current = nextImages;
+      onChange(nextImages);
     },
-    [onChange, value]
+    [onChange]
   );
 
   const removeImage = useCallback(
-    (image: string) => onChange(value.filter((item) => item !== image)),
-    [onChange, value],
+    (image: string) => {
+      const nextImages = valueRef.current.filter((item) => item !== image);
+      valueRef.current = nextImages;
+      onChange(nextImages);
+    },
+    [onChange],
   );
 
   const makeCover = useCallback(
-    (image: string) =>
-      onChange([image, ...value.filter((item) => item !== image)]),
-    [onChange, value],
+    (image: string) => {
+      const nextImages = [
+        image,
+        ...valueRef.current.filter((item) => item !== image),
+      ];
+      valueRef.current = nextImages;
+      onChange(nextImages);
+    },
+    [onChange],
   );
 
   const handleError = useCallback((error: unknown) => {

@@ -69,6 +69,30 @@ describe("ImageUpload", () => {
     expect(onChange).toHaveBeenCalledWith(["https://res.cloudinary.com/x.png"]);
   });
 
+  it("keeps every image when Cloudinary reports multiple uploads in sequence", () => {
+    const onChange = vi.fn();
+    render(<ImageUpload value={[]} onChange={onChange} />);
+
+    widget.onSuccess?.(
+      { info: { secure_url: "https://res.cloudinary.com/one.png" } },
+      {},
+    );
+    widget.onSuccess?.(
+      { info: { secure_url: "https://res.cloudinary.com/two.png" } },
+      {},
+    );
+    widget.onSuccess?.(
+      { info: { secure_url: "https://res.cloudinary.com/three.png" } },
+      {},
+    );
+
+    expect(onChange).toHaveBeenLastCalledWith([
+      "https://res.cloudinary.com/one.png",
+      "https://res.cloudinary.com/two.png",
+      "https://res.cloudinary.com/three.png",
+    ]);
+  });
+
   it("ignores a result that carries no upload info", () => {
     const onChange = vi.fn();
     render(<ImageUpload value={[]} onChange={onChange} />);
