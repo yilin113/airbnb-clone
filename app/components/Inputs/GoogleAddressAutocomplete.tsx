@@ -55,6 +55,7 @@ declare global {
     google?: {
       maps?: GoogleMapsNamespace;
     };
+    __japanMidtermGoogleMapsReady?: () => void;
   }
 }
 
@@ -73,6 +74,7 @@ const loadPlacesLibrary = (apiKey: string) => {
 
   if (!placesLibraryPromise) {
     placesLibraryPromise = new Promise<GooglePlacesLibrary>((resolve, reject) => {
+      const callbackName = "__japanMidtermGoogleMapsReady";
       const existing = document.querySelector<HTMLScriptElement>(
         'script[data-japan-midterm-google-maps="true"]',
       );
@@ -83,14 +85,24 @@ const loadPlacesLibrary = (apiKey: string) => {
             throw new Error("Google Maps JavaScript API did not initialize");
           }
 
-          resolve(await window.google.maps.importLibrary("places"));
+          const library = await window.google.maps.importLibrary("places");
+          delete window.__japanMidtermGoogleMapsReady;
+          resolve(library);
         } catch (error) {
+          delete window.__japanMidtermGoogleMapsReady;
           reject(error);
         }
       };
 
       if (existing) {
-        existing.addEventListener("load", finishLoading, { once: true });
+        if (window.google?.maps?.importLibrary) {
+          void finishLoading();
+          return;
+        }
+
+        window.__japanMidtermGoogleMapsReady = () => {
+          void finishLoading();
+        };
         existing.addEventListener(
           "error",
           () => reject(new Error("Google Maps JavaScript API failed to load")),
@@ -107,12 +119,15 @@ const loadPlacesLibrary = (apiKey: string) => {
         language: "ja",
         region: "JP",
         v: "weekly",
+        callback: callbackName,
       });
 
       script.src = `https://maps.googleapis.com/maps/api/js?${parameters}`;
       script.async = true;
       script.dataset.japanMidtermGoogleMaps = "true";
-      script.addEventListener("load", finishLoading, { once: true });
+      window.__japanMidtermGoogleMapsReady = () => {
+        void finishLoading();
+      };
       script.addEventListener(
         "error",
         () => reject(new Error("Google Maps JavaScript API failed to load")),
