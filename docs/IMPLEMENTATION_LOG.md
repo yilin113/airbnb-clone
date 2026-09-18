@@ -235,8 +235,8 @@
 
 ### Scope
 
-- Added the current Google Places `PlaceAutocompleteElement` to the host
-  location step, restricted to Japanese results.
+- Added the current Google Places `AutocompleteSuggestion` service to the host
+  location step with an accessible custom result list restricted to Japan.
 - Selecting an address now fills the private full address, Japanese postal
   code, and exact map coordinates while preserving manual-entry fallback.
 - Documented the browser environment variable and required domain/API key
