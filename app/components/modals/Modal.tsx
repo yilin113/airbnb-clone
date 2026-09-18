@@ -111,6 +111,8 @@ const Modal: React.FC<ModalProps> = ({
           overflow-y-hidden
           fixed
           inset-0
+          p-0
+          md:p-6
           z-50
           outline-none
           focus:outline-none
@@ -124,11 +126,10 @@ const Modal: React.FC<ModalProps> = ({
             md:w-4/6
             lg:w-3/6
             xl:w-2/5
-            my-6
             mx-auto
             h-full
-            lg:h-auto
             md:h-auto
+            md:max-h-[calc(100dvh-3rem)]
           "
         >
           {/*content*/}
@@ -145,14 +146,16 @@ const Modal: React.FC<ModalProps> = ({
               className="
                 translate
                 h-full
-                lg:h-auto
                 md:h-auto
+                max-h-[100dvh]
+                md:max-h-[calc(100dvh-3rem)]
                 border-0
                 rounded-lg
                 shadow-lg
                 relative
                 flex
                 flex-col
+                overflow-hidden
                 w-full
                 bg-white
                 outline-none
@@ -168,6 +171,7 @@ const Modal: React.FC<ModalProps> = ({
                   rounded-t
                   justify-center
                   relative
+                  shrink-0
                   border-b-[1px]
                 "
               >
@@ -194,9 +198,17 @@ const Modal: React.FC<ModalProps> = ({
                 </div>
               </div>
               {/*body*/}
-              <div className="relative p-6 flex-auto">{body}</div>
+              <div
+                data-testid="modal-body"
+                className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain p-6"
+              >
+                {body}
+              </div>
               {/*footer*/}
-              <div className="flex flex-col gap-2 p-6">
+              <div
+                data-testid="modal-footer"
+                className="flex shrink-0 flex-col gap-2 border-t border-neutral-200 bg-white p-4 md:p-6"
+              >
                 <div
                   className="
                     flex

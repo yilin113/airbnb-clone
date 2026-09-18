@@ -248,3 +248,21 @@
 - `eslint .`: zero errors; the pre-existing React Compiler warning in
   `RentModal.tsx` remains.
 - `next typegen && tsc --noEmit`: passed.
+
+## 2026-09-18 — Scrollable listing modal
+
+### Scope
+
+- Constrained every modal to the visible browser height, including short
+  laptop screens and mobile viewports.
+- Made the modal content area independently scrollable while keeping the
+  header and navigation footer visible.
+- Added a regression check for the scroll container and fixed footer layout.
+
+### Verification
+
+- `vitest run`: 31 files, 270 tests passed.
+- `eslint .`: zero errors; the pre-existing React Compiler warning in
+  `RentModal.tsx` remains.
+- `next typegen && tsc --noEmit`: passed.
+- Responsive production browser verification will follow deployment.

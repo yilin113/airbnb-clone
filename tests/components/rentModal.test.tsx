@@ -88,6 +88,22 @@ describe("RentModal", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("keeps long steps scrollable while the navigation footer stays separate", async () => {
+    render(<RentModal />);
+
+    await userEvent.click(screen.getByText("Beach"));
+    await next();
+
+    expect(screen.getByTestId("modal-body")).toHaveClass(
+      "min-h-0",
+      "overflow-y-auto",
+    );
+    expect(screen.getByTestId("modal-footer")).toHaveClass("shrink-0");
+    expect(
+      screen.getByRole("button", { name: "下一步" }),
+    ).toBeInTheDocument();
+  });
+
   it("walks forwards and backwards through every step", async () => {
     render(<RentModal />);
 
