@@ -1,6 +1,11 @@
 "use client";
 
-import { FieldErrors, FieldValues, UseFormRegister } from "react-hook-form";
+import {
+  FieldErrors,
+  FieldValues,
+  RegisterOptions,
+  UseFormRegister,
+} from "react-hook-form";
 import { BiDollar } from "react-icons/bi";
 
 interface InputProps {
@@ -10,6 +15,7 @@ interface InputProps {
   disabled?: boolean;
   formatPrice?: boolean;
   required?: boolean;
+  validation?: RegisterOptions<FieldValues, string>;
   register: UseFormRegister<FieldValues>;
   errors: FieldErrors;
 }
@@ -21,6 +27,7 @@ const Input: React.FC<InputProps> = ({
   disabled = false,
   formatPrice = false,
   required = false,
+  validation,
   register,
   errors,
 }) => {
@@ -36,7 +43,10 @@ const Input: React.FC<InputProps> = ({
         id={id}
         type={type}
         disabled={disabled}
-        {...register(id, { required })}
+        {...register(id, {
+          required: required ? "此欄位為必填" : false,
+          ...validation,
+        })}
         placeholder=" "
         className={`
           peer
@@ -76,6 +86,11 @@ const Input: React.FC<InputProps> = ({
       >
         {label}
       </label>
+      {errors[id]?.message && (
+        <p className="mt-1 text-sm text-rose-600">
+          {String(errors[id]?.message)}
+        </p>
+      )}
     </div>
   );
 };

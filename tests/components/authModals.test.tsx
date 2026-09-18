@@ -12,7 +12,9 @@ import { routerMock } from "../helpers/mocks";
 const signIn = vi.hoisted(() => vi.fn());
 vi.mock("next-auth/react", () => ({ signIn, signOut: vi.fn() }));
 
-vi.mock("axios", () => ({ default: { post: vi.fn() } }));
+vi.mock("axios", () => ({
+  default: { post: vi.fn(), isAxiosError: vi.fn(() => false) },
+}));
 
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
 vi.mock("react-hot-toast", () => ({ toast, default: toast }));
@@ -50,7 +52,7 @@ describe("LoginModal", () => {
 
     await fill("email", "ada@example.com");
     await fill("password", "secret");
-    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await userEvent.click(screen.getByRole("button", { name: "登入" }));
 
     await waitFor(() => {
       expect(signIn).toHaveBeenCalledWith("credentials", {
@@ -70,7 +72,7 @@ describe("LoginModal", () => {
 
     await fill("email", "ada@example.com");
     await fill("password", "wrong");
-    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await userEvent.click(screen.getByRole("button", { name: "登入" }));
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith("Invalid credentials");
@@ -78,24 +80,17 @@ describe("LoginModal", () => {
     expect(useLoginModal.getState().isOpen).toBe(true);
   });
 
-  it("offers the social providers", async () => {
+  it("explains that social providers are not available yet", () => {
     render(<LoginModal />);
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "使用 Google 繼續" }),
-    );
-    expect(signIn).toHaveBeenCalledWith("google");
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "使用 GitHub 繼續" }),
-    );
-    expect(signIn).toHaveBeenCalledWith("github");
+    expect(
+      screen.getByText("Google 與 GitHub 登入將於後續開放"),
+    ).toBeInTheDocument();
   });
 
   it("hands over to the register modal", async () => {
     render(<LoginModal />);
 
-    await userEvent.click(screen.getByText("Create an account"));
+    await userEvent.click(screen.getByText("建立帳號"));
 
     expect(useLoginModal.getState().isOpen).toBe(false);
     expect(useRegisterModal.getState().isOpen).toBe(true);
@@ -113,14 +108,14 @@ describe("RegisterModal", () => {
 
     await fill("email", "ada@example.com");
     await fill("name", "Ada");
-    await fill("password", "secret");
-    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await fill("password", "secret-123");
+    await userEvent.click(screen.getByRole("button", { name: "建立帳號" }));
 
     await waitFor(() => {
       expect(mockedAxios.post).toHaveBeenCalledWith("/api/register", {
         email: "ada@example.com",
         name: "Ada",
-        password: "secret",
+        password: "secret-123",
       });
     });
     expect(toast.success).toHaveBeenCalledWith("帳號建立成功");
@@ -134,35 +129,42 @@ describe("RegisterModal", () => {
 
     await fill("email", "ada@example.com");
     await fill("name", "Ada");
-    await fill("password", "secret");
-    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await fill("password", "secret-123");
+    await userEvent.click(screen.getByRole("button", { name: "建立帳號" }));
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
-        "發生錯誤，請稍後再試",
+        "無法建立帳號，請稍後再試",
       );
     });
     expect(useRegisterModal.getState().isOpen).toBe(true);
   });
 
-  it("offers the social providers", async () => {
+  it("rejects a short password before calling the API", async () => {
     render(<RegisterModal />);
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "使用 Google 繼續" }),
-    );
-    expect(signIn).toHaveBeenCalledWith("google");
+    await fill("email", "ada@example.com");
+    await fill("name", "Ada");
+    await fill("password", "short1");
+    await userEvent.click(screen.getByRole("button", { name: "建立帳號" }));
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "使用 GitHub 繼續" }),
-    );
-    expect(signIn).toHaveBeenCalledWith("github");
+    expect(
+      await screen.findByText("密碼至少需要 8 個字元"),
+    ).toBeInTheDocument();
+    expect(mockedAxios.post).not.toHaveBeenCalled();
+  });
+
+  it("explains that social providers are not available yet", () => {
+    render(<RegisterModal />);
+    expect(
+      screen.getByText("Google 與 GitHub 登入將於後續開放"),
+    ).toBeInTheDocument();
   });
 
   it("hands over to the login modal", async () => {
     render(<RegisterModal />);
 
-    await userEvent.click(screen.getByText("Log in"));
+    await userEvent.click(screen.getByText("登入"));
 
     expect(useRegisterModal.getState().isOpen).toBe(false);
     expect(useLoginModal.getState().isOpen).toBe(true);

@@ -1,8 +1,6 @@
 "use client";
 
 import axios from "axios";
-import { AiFillGithub } from "react-icons/ai";
-import { FcGoogle } from "react-icons/fc";
 import { useCallback, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 
@@ -11,8 +9,6 @@ import Modal from "./Modal";
 import Heading from "../Heading";
 import Input from "../Inputs/Input";
 import toast from "react-hot-toast";
-import Button from "../Button";
-import { signIn } from "next-auth/react";
 import useLoginModal from "@/app/hooks/useLoginModal";
 
 const RegisterModal = () => {
@@ -42,8 +38,23 @@ const RegisterModal = () => {
         registerModal.onClose();
         loginModal.onOpen();
       })
-      .catch(() => {
-        toast.error("發生錯誤，請稍後再試");
+      .catch((error: unknown) => {
+        if (axios.isAxiosError(error)) {
+          const code = error.response?.data?.error?.code;
+          const issue = error.response?.data?.error?.issues?.[0]?.message;
+
+          if (code === "EMAIL_ALREADY_EXISTS") {
+            toast.error("這個電子郵件已經註冊過");
+            return;
+          }
+
+          if (code === "VALIDATION_ERROR" && issue) {
+            toast.error(issue);
+            return;
+          }
+        }
+
+        toast.error("無法建立帳號，請稍後再試");
       })
       .finally(() => {
         setIsLoading(false);
@@ -61,10 +72,17 @@ const RegisterModal = () => {
       <Input
         id="email"
         label="電子郵件"
+        type="email"
         disabled={isLoading}
         register={register}
         errors={errors}
         required
+        validation={{
+          pattern: {
+            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            message: "請輸入有效的電子郵件",
+          },
+        }}
       />
       <Input
         id="name"
@@ -73,14 +91,23 @@ const RegisterModal = () => {
         register={register}
         errors={errors}
         required
+        validation={{
+          minLength: { value: 2, message: "姓名至少需要 2 個字元" },
+          maxLength: { value: 80, message: "姓名最多 80 個字元" },
+        }}
       />
       <Input
         id="password"
         label="密碼"
+        type="password"
         disabled={isLoading}
         register={register}
         errors={errors}
         required
+        validation={{
+          minLength: { value: 8, message: "密碼至少需要 8 個字元" },
+          maxLength: { value: 72, message: "密碼最多 72 個字元" },
+        }}
       />
     </div>
   );
@@ -88,18 +115,9 @@ const RegisterModal = () => {
   const footerContent = (
     <div className="flex flex-col gap-4 mt-3">
       <hr />
-      <Button
-        outline
-        label="使用 Google 繼續"
-        icon={FcGoogle}
-        onClick={() => signIn("google")}
-      />
-      <Button
-        outline
-        label="使用 GitHub 繼續"
-        icon={AiFillGithub}
-        onClick={() => signIn("github")}
-      />
+      <div className="text-center text-sm text-neutral-500">
+        Google 與 GitHub 登入將於後續開放
+      </div>
       <div
         className="
         text-neutral-500
@@ -109,7 +127,7 @@ const RegisterModal = () => {
         "
       >
         <div className="flex flex-row items-center justify-center gap-2">
-          <div>Already have an account?</div>
+          <div>已經有帳號？</div>
           <div
             onClick={toggle}
             className="
@@ -118,7 +136,7 @@ const RegisterModal = () => {
             hover:underline
             "
           >
-            Log in
+            登入
           </div>
         </div>
       </div>
@@ -129,7 +147,7 @@ const RegisterModal = () => {
       disabled={isLoading}
       isOpen={registerModal.isOpen}
       title="註冊"
-      actionLabel="Continue"
+      actionLabel="建立帳號"
       onClose={registerModal.onClose}
       onSubmit={handleSubmit(onSubmit)}
       body={bodyContent}

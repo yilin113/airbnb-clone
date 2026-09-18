@@ -1,8 +1,6 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { AiFillGithub } from "react-icons/ai";
-import { FcGoogle } from "react-icons/fc";
 import { useCallback, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
@@ -12,7 +10,6 @@ import Modal from "./Modal";
 import Heading from "../Heading";
 import Input from "../Inputs/Input";
 import toast from "react-hot-toast";
-import Button from "../Button";
 import useRegisterModal from "@/app/hooks/useRegisterModal";
 
 const LoginModal = () => {
@@ -64,6 +61,7 @@ const LoginModal = () => {
       <Input
         id="email"
         label="電子郵件"
+        type="email"
         disabled={isLoading}
         register={register}
         errors={errors}
@@ -84,18 +82,9 @@ const LoginModal = () => {
   const footerContent = (
     <div className="flex flex-col gap-4 mt-3">
       <hr />
-      <Button
-        outline
-        label="使用 Google 繼續"
-        icon={FcGoogle}
-        onClick={() => signIn("google")}
-      />
-      <Button
-        outline
-        label="使用 GitHub 繼續"
-        icon={AiFillGithub}
-        onClick={() => signIn("github")}
-      />
+      <div className="text-center text-sm text-neutral-500">
+        Google 與 GitHub 登入將於後續開放
+      </div>
       <div
         className="
         text-neutral-500
@@ -114,7 +103,7 @@ const LoginModal = () => {
             hover:underline
             "
           >
-            Create an account
+            建立帳號
           </div>
         </div>
       </div>
@@ -125,7 +114,7 @@ const LoginModal = () => {
       disabled={isLoading}
       isOpen={loginModal.isOpen}
       title="登入"
-      actionLabel="Continue"
+      actionLabel="登入"
       onClose={loginModal.onClose}
       onSubmit={handleSubmit(onSubmit)}
       body={bodyContent}

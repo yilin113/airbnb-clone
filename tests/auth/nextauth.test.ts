@@ -41,10 +41,8 @@ describe("authOptions", () => {
     expect(authOptions.session).toEqual({ strategy: "jwt" });
   });
 
-  it("registers the github, google and credentials providers", () => {
+  it("registers credentials without unconfigured social providers", () => {
     expect(authOptions.providers.map((provider) => provider.id)).toEqual([
-      "github",
-      "google",
       "credentials",
     ]);
   });
